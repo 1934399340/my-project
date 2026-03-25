@@ -1,0 +1,12 @@
+{
+  "name": "creatorhub",
+  "version": "1.0.0",
+  "description": "CreatorHub - 自媒体个人网站",
+  "main": "index.html",
+  "scripts": {
+    "dev": "echo 'Static site - open index.html directly'"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.8"
+  }
+}

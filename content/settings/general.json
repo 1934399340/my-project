@@ -1,0 +1,14 @@
+{
+  "siteTitle": "CreatorHub",
+  "siteDescription": "创作者个人网站 - 作品集、文案研究、剪辑技巧、摄影分享",
+  "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80",
+  "email": "1934399340@qq.com",
+  "wechat": "creator_hub",
+  "address": "上海市浦东新区",
+  "social": {
+    "bilibili": "https://space.bilibili.com/123456789",
+    "douyin": "https://www.douyin.com/user/xxx",
+    "xiaohongshu": "https://www.xiaohongshu.com/user/profile/xxx",
+    "weibo": "https://weibo.com/u/123456789"
+  }
+}
