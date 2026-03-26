@@ -31,5 +31,10 @@
     X-Frame-Options = "ALLOWALL"
     Content-Security-Policy = "frame-src 'self' https://unpkg.com https://identity.netlify.com;"
 
+[[headers]]
+  for = "/*.yml"
+  [headers.values]
+    Content-Type = "text/yaml"
+
 [context.production]
   command = "echo 'Static site deployed'"

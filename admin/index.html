@@ -20,41 +20,12 @@
             color: #e2e8f0;
             min-height: 100vh;
         }
-        .admin-loading {
+        .loading {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 40px;
-        }
-        .admin-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .admin-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .admin-logo-icon {
-            font-size: 2rem;
-            color: #818cf8;
-        }
-        .admin-logo-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #fff;
-        }
-        .admin-subtitle {
-            color: #94a3b8;
-            font-size: 1rem;
-        }
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
         }
         .loading-spinner {
             width: 50px;
@@ -63,7 +34,7 @@
             border-top-color: #818cf8;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin-bottom: 20px;
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
@@ -72,137 +43,24 @@
             color: #94a3b8;
             font-size: 0.875rem;
         }
-        .admin-footer {
-            margin-top: 40px;
-            text-align: center;
-            color: #64748b;
-            font-size: 0.75rem;
-        }
-        .admin-footer a {
-            color: #818cf8;
-            text-decoration: none;
-        }
-        .admin-footer a:hover {
-            text-decoration: underline;
-        }
-        .auth-alert {
-            max-width: 400px;
-            text-align: center;
-            padding: 24px;
-        }
-        .auth-alert h2 {
-            color: #fff;
-            margin-bottom: 12px;
-        }
-        .auth-alert p {
-            color: #94a3b8;
-            margin-bottom: 24px;
-        }
-        .auth-btn {
-            display: inline-block;
-            padding: 14px 32px;
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .auth-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
-        }
     </style>
 </head>
 <body>
-    <div class="admin-loading" id="authCheck">
-        <div class="admin-header">
-            <div class="admin-logo">
-                <span class="admin-logo-icon">✦</span>
-                <span class="admin-logo-text">CreatorHub</span>
-            </div>
-            <p class="admin-subtitle">内容管理系统</p>
-        </div>
-
-        <div class="loading" id="loadingState">
-            <div class="loading-spinner"></div>
-            <p class="loading-text">正在验证身份...</p>
-        </div>
-
-        <div class="auth-alert" id="loginPrompt" style="display: none;">
-            <h2>请先登录</h2>
-            <p>您需要登录才能访问内容管理后台</p>
-            <a href="/admin/login.html" class="auth-btn">前往登录</a>
-        </div>
-
-        <div class="admin-footer">
-            <p>由 <a href="https://decapcms.org" target="_blank">Decap CMS</a> 提供支持</p>
-        </div>
+    <div class="loading">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">正在加载管理后台，请稍候...</p>
     </div>
 
-    <div id="cmsContainer" style="display: none;">
-    </div>
-
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <script src="https://unpkg.com/decap-cms@3.1.0/dist/decap-cms.js"></script>
     <script>
-        const authCheck = document.getElementById('authCheck');
-        const loadingState = document.getElementById('loadingState');
-        const loginPrompt = document.getElementById('loginPrompt');
-        const cmsContainer = document.getElementById('cmsContainer');
-
-        function checkAuth() {
-            if (typeof window !== 'undefined' && window.netlifyIdentity) {
-                window.netlifyIdentity.on('init', user => {
-                    if (user) {
-                        showCMS();
-                    } else {
-                        showLoginPrompt();
-                    }
-                });
-
-                window.netlifyIdentity.on('login', () => {
-                    window.netlifyIdentity.close();
-                    showCMS();
-                });
-
-                window.netlifyIdentity.on('logout', () => {
-                    window.location.href = '/admin/login.html';
-                });
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.CMS) {
+                console.log('Decap CMS loaded');
+                // CMS.init() is automatically called
             } else {
-                const currentHost = window.location.hostname;
-                if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-                    showLocalDevMessage();
-                } else {
-                    showLoginPrompt();
-                }
+                console.error('Decap CMS not loaded');
             }
-        }
-
-        function showCMS() {
-            authCheck.style.display = 'none';
-            cmsContainer.style.display = 'block';
-        }
-
-        function showLoginPrompt() {
-            loadingState.style.display = 'none';
-            loginPrompt.style.display = 'block';
-        }
-
-        function showLocalDevMessage() {
-            loadingState.innerHTML = `
-                <p class="loading-text" style="color: #fbbf24;">
-                    本地开发环境检测到
-                </p>
-                <p class="loading-text" style="margin-top: 12px;">
-                    请运行: <code style="background: rgba(99,102,241,0.2); padding: 4px 8px; border-radius: 4px;">npx decap-server</code>
-                </p>
-                <p class="loading-text" style="margin-top: 12px;">
-                    然后访问: <code style="background: rgba(99,102,241,0.2); padding: 4px 8px; border-radius: 4px;">http://localhost:3000/admin</code>
-                </p>
-            `;
-        }
-
-        checkAuth();
+        });
     </script>
 </body>
 </html>

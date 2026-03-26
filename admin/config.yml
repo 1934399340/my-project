@@ -1,48 +1,19 @@
 backend:
   name: git-gateway
+  repo: 1934399340/my-project
   branch: main
 
-local_backend: true
+local_backend: false
+
+site_url: https://localhost:8000
+display_url: https://localhost:8000
 
 media_folder: "images"
 public_folder: "/images"
 
-login_url: /admin/login.html
+
 
 collections:
-  - name: "portfolio"
-    label: "作品集"
-    folder: "content/portfolio"
-    create: true
-    slug: "{{slug}}"
-    identifier_field: title
-    fields:
-      - { label: "标题", name: "title", widget: "string" }
-      - { label: "类别", name: "category", widget: "select", options: ["video", "photo", "brand"] }
-      - { label: "封面图片", name: "cover", widget: "image" }
-      - { label: "描述", name: "description", widget: "text" }
-      - { label: "客户", name: "client", widget: "string", required: false }
-      - { label: "年份", name: "year", widget: "string", default: "2024" }
-      - { label: "浏览量", name: "views", widget: "string", default: "0" }
-      - { label: "点赞数", name: "likes", widget: "string", default: "0" }
-      - { label: "精选", name: "featured", widget: "boolean", default: false }
-      - { label: "发布时间", name: "date", widget: "datetime" }
-
-  - name: "posts"
-    label: "文章"
-    folder: "content/posts"
-    create: true
-    slug: "{{slug}}"
-    identifier_field: title
-    fields:
-      - { label: "标题", name: "title", widget: "string" }
-      - { label: "分类", name: "category", widget: "select", options: ["文案技巧", "案例拆解", "工具推荐", "剪辑教程", "摄影"] }
-      - { label: "封面图片", name: "cover", widget: "image" }
-      - { label: "摘要", name: "excerpt", widget: "text" }
-      - { label: "阅读时间(分钟)", name: "readTime", widget: "number", default: 5 }
-      - { label: "内容", name: "body", widget: "markdown" }
-      - { label: "发布时间", name: "date", widget: "datetime" }
-
   - name: "settings"
     label: "网站设置"
     files:
@@ -64,3 +35,40 @@ collections:
               - { label: "抖音", name: "douyin", widget: "string", required: false }
               - { label: "小红书", name: "xiaohongshu", widget: "string", required: false }
               - { label: "微博", name: "weibo", widget: "string", required: false }
+
+  - name: "portfolio"
+    label: "作品集"
+    folder: "content/portfolio"
+    extension: json
+    format: json
+    create: true
+    slug: "{{slug}}"
+    identifier_field: title
+    fields:
+      - { label: "标题", name: "title", widget: "string" }
+      - { label: "类别", name: "category", widget: "select", options: ["video", "photo", "brand"] }
+      - { label: "封面图片", name: "cover", widget: "image" }
+      - { label: "描述", name: "description", widget: "text" }
+      - { label: "客户", name: "client", widget: "string", required: false }
+      - { label: "年份", name: "year", widget: "string", default: "2024" }
+      - { label: "浏览量", name: "views", widget: "string", default: "0" }
+      - { label: "点赞数", name: "likes", widget: "string", default: "0" }
+      - { label: "精选", name: "featured", widget: "boolean", default: false }
+      - { label: "发布时间", name: "date", widget: "datetime" }
+
+  - name: "posts"
+    label: "文章"
+    folder: "content/posts"
+    extension: json
+    format: json
+    create: true
+    slug: "{{slug}}"
+    identifier_field: title
+    fields:
+      - { label: "标题", name: "title", widget: "string" }
+      - { label: "分类", name: "category", widget: "select", options: ["文案技巧", "案例拆解", "工具推荐", "剪辑教程", "摄影"] }
+      - { label: "封面图片", name: "cover", widget: "image" }
+      - { label: "摘要", name: "excerpt", widget: "text" }
+      - { label: "阅读时间(分钟)", name: "readTime", widget: "number", default: 5 }
+      - { label: "内容", name: "body", widget: "markdown" }
+      - { label: "发布时间", name: "date", widget: "datetime" }

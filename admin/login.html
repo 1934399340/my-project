@@ -77,10 +77,66 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
         }
-        .login-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        .status-message {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.875rem;
+        }
+        .status-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .status-info {
+            background: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        .user-info {
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .user-info h3 {
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        .user-info p {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+        .admin-link {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+        }
+        .admin-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2);
         }
         .login-footer {
             margin-top: 24px;
@@ -99,61 +155,6 @@
         .login-footer a:hover {
             text-decoration: underline;
         }
-        .user-info {
-            background: rgba(99, 102, 241, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-        .user-info h3 {
-            color: #fff;
-            font-size: 1rem;
-            margin-bottom: 8px;
-        }
-        .user-info p {
-            color: #94a3b8;
-            font-size: 0.875rem;
-        }
-        .logout-btn {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        .logout-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
-            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2);
-        }
-        .admin-link {
-            display: inline-block;
-            padding: 14px 32px;
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin-top: 16px;
-        }
-        .admin-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
-        }
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            margin-bottom: 16px;
-        }
-        .alert-error {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        .alert-success {
-            background: rgba(34, 197, 94, 0.1);
-            color: #22c55e;
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
     </style>
 </head>
 <body>
@@ -167,10 +168,10 @@
         <p class="login-subtitle">通过 Netlify Identity 进行身份验证</p>
 
         <div id="loginSection">
-            <div class="alert alert-success">
+            <div id="statusMessage" class="status-message status-info">
                 点击下方按钮使用 GitHub 账号登录
             </div>
-            <button class="login-btn" id="loginBtn" onclick="login()">
+            <button class="login-btn" id="loginBtn">
                 使用 GitHub 登录
             </button>
         </div>
@@ -183,60 +184,70 @@
             <a href="/admin/index.html" class="admin-link">
                 进入管理后台
             </a>
-            <button class="login-btn logout-btn" onclick="logout()">
+            <button class="login-btn logout-btn" id="logoutBtn">
                 退出登录
             </button>
         </div>
 
         <div class="login-footer">
-            <p>需要管理员权限？请联系网站所有者</p>
+            <p>首次使用需要先登录 GitHub</p>
             <p><a href="/">返回网站首页</a></p>
         </div>
     </div>
 
     <script>
-        function login() {
-            const currentSite = window.location.hostname;
-            if (currentSite === 'localhost' || currentSite === '127.0.0.1') {
-                alert('本地开发环境请使用: npx decap-server\n或访问 Netlify 部署后的 /admin/login.html');
-                return;
-            }
-            window.netlifyIdentity.open('login');
-        }
+        const loginSection = document.getElementById('loginSection');
+        const userSection = document.getElementById('userSection');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
 
-        function logout() {
-            window.netlifyIdentity.logout();
-        }
-
-        function onLogin(user) {
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('userSection').style.display = 'block';
+        function updateUI(user) {
             if (user) {
-                document.getElementById('userName').textContent = user.user_metadata?.full_name || user.email;
-                document.getElementById('userEmail').textContent = user.email;
+                loginSection.style.display = 'none';
+                userSection.style.display = 'block';
+                userName.textContent = user.user_metadata?.full_name || user.email;
+                userEmail.textContent = user.email;
+            } else {
+                loginSection.style.display = 'block';
+                userSection.style.display = 'none';
             }
         }
 
         if (window.netlifyIdentity) {
-            window.netlifyIdentity.on('init', user => {
+            window.netlifyIdentity.on('init', function(user) {
                 if (user) {
-                    onLogin(user);
+                    updateUI(user);
+                } else {
+                    statusMessage.textContent = '请登录以访问管理后台';
+                    statusMessage.className = 'status-message status-info';
                 }
             });
 
-            window.netlifyIdentity.on('login', user => {
-                window.netlifyIdentity.close();
-                onLogin(user);
+            loginBtn.addEventListener('click', function() {
+                window.netlifyIdentity.open('login');
             });
 
-            window.netlifyIdentity.on('logout', () => {
-                document.getElementById('loginSection').style.display = 'block';
-                document.getElementById('userSection').style.display = 'none';
+            logoutBtn.addEventListener('click', function() {
+                window.netlifyIdentity.logout();
+            });
+
+            window.netlifyIdentity.on('login', function(user) {
+                window.netlifyIdentity.close();
+                updateUI(user);
+            });
+
+            window.netlifyIdentity.on('logout', function() {
+                updateUI(null);
+                statusMessage.textContent = '已退出登录';
+                statusMessage.className = 'status-message status-info';
             });
         } else {
-            document.querySelector('.alert-success').textContent = 'Netlify Identity 未加载，请确保已部署到 Netlify';
-            document.querySelector('.alert-success').className = 'alert alert-error';
-            document.getElementById('loginBtn').disabled = true;
+            statusMessage.textContent = 'Netlify Identity 未加载，请确保网站已部署到 Netlify';
+            statusMessage.className = 'status-message status-error';
+            loginBtn.disabled = true;
         }
     </script>
 </body>
