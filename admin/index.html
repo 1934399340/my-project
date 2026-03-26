@@ -3,30 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>内容管理 - CreatorHub</title>
+    <title>CreatorHub 后台管理系统</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/decap-cms@3.1.0/dist/decap-cms.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/supabase.min.js"></script>
+    <script src="config.js"></script>
+    <script src="services/supabase-client.js"></script>
+    <script src="services/cloudinary-client.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0f172a;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: #e2e8f0;
             min-height: 100vh;
         }
-        .loading {
+
+        .admin-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             min-height: 100vh;
         }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 260px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 24px 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            color: #818cf8;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .logo-subtitle {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .nav-section {
+            padding: 24px 0;
+        }
+
+        .nav-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0 24px 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            border-left: 3px solid #818cf8;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .user-info {
+            padding: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .user-email {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        /* 主内容区样式 */
+        .main-content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .page-subtitle {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.blue {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+        }
+
+        .stat-icon.green {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .stat-icon.purple {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+
+        .stat-icon.orange {
+            background: rgba(249, 115, 22, 0.2);
+            color: #f97316;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        /* 内容编辑区样式 */
+        .content-section {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            color: #818cf8;
+        }
+
+        /* CMS容器样式 */
+        .cms-container {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cms-loading {
+            padding: 48px;
+            text-align: center;
+        }
+
         .loading-spinner {
             width: 50px;
             height: 50px;
@@ -34,33 +274,1370 @@
             border-top-color: #818cf8;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            margin: 0 auto 20px;
         }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
         .loading-text {
             color: #94a3b8;
             font-size: 0.875rem;
         }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid #22c55e;
+        }
+
+        .notification.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .notification.info {
+            border-left: 4px solid #818cf8;
+        }
+
+        .notification-icon {
+            font-size: 1.25rem;
+        }
+
+        .notification.success .notification-icon {
+            color: #22c55e;
+        }
+
+        .notification.error .notification-icon {
+            color: #ef4444;
+        }
+
+        .notification.info .notification-icon {
+            color: #818cf8;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .admin-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                padding: 16px;
+            }
+            
+            .main-content {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+
+        /* Decap CMS样式覆盖 */
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        .nc-root {
+            background: transparent !important;
+            color: var(--text) !important;
+        }
+
+        .nc-githubAuthenticationPage-root,
+        .nc-app,
+        .nc-entryEditor-container,
+        .nc-collectionPage-container,
+        .nc-workflow-container {
+            background: var(--surface) !important;
+            color: var(--text) !important;
+            border-color: var(--border) !important;
+        }
+
+        .nc-appHeader,
+        .nc-collectionPage-sidebar,
+        .nc-sidebar {
+            background: rgba(15, 23, 42, 0.9) !important;
+            border-color: var(--border) !important;
+        }
+
+        .nc-button,
+        .nc-buttonPrimary {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
+        }
+
+        .nc-button:hover,
+        .nc-buttonPrimary:hover {
+            background: var(--primary-dark) !important;
+        }
+
+        .nc-input,
+        .nc-select,
+        .nc-textarea {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border-color: var(--border) !important;
+            color: var(--text) !important;
+        }
+
+        .nc-input:focus,
+        .nc-select:focus,
+        .nc-textarea:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+        }
+
+        .nc-card {
+            background: var(--surface) !important;
+            border-color: var(--border) !important;
+        }
+
+        .nc-table th,
+        .nc-table td {
+            border-color: var(--border) !important;
+        }
+
+        .nc-table tr:hover {
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
     </style>
 </head>
 <body>
-    <div class="loading">
-        <div class="loading-spinner"></div>
-        <p class="loading-text">正在加载管理后台，请稍候...</p>
+    <div class="admin-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">✦</div>
+                <div>
+                    <div class="logo-text">CreatorHub</div>
+                    <div class="logo-subtitle">后台管理系统</div>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">主要内容</div>
+                <div class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>仪表盘</span>
+                </div>
+                <div class="nav-item" data-section="cms">
+                    <i class="fas fa-edit"></i>
+                    <span>内容管理</span>
+                </div>
+                <div class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>网站设置</span>
+                </div>
+                <div class="nav-item" data-section="portfolio">
+                    <i class="fas fa-images"></i>
+                    <span>作品集</span>
+                </div>
+                <div class="nav-item" data-section="posts">
+                    <i class="fas fa-newspaper"></i>
+                    <span>文章</span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">系统工具</div>
+                <div class="nav-item" data-section="media">
+                    <i class="fas fa-photo-video"></i>
+                    <span>媒体库</span>
+                </div>
+                <div class="nav-item" data-section="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span>数据分析</span>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">?</div>
+                <div class="user-name" id="userName">加载中...</div>
+                <div class="user-email" id="userEmail">正在获取用户信息</div>
+                <button class="btn btn-secondary" id="logoutBtn" style="margin-top: 12px; width: 100%;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 仪表盘 -->
+            <div id="dashboard-section" class="content-section">
+                <div class="header">
+                    <div>
+                        <h1 class="page-title">仪表盘</h1>
+                        <p class="page-subtitle">欢迎回来！这是您的网站数据概览</p>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="refreshStats">
+                            <i class="fas fa-sync-alt"></i>
+                            刷新数据
+                        </button>
+                        <button class="btn btn-primary" id="quickAction">
+                            <i class="fas fa-plus"></i>
+                            快速操作
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-value" id="statVisits">--</div>
+                        <div class="stat-label">今日访问量</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="stat-value" id="statLikes">--</div>
+                        <div class="stat-label">作品点赞数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-value" id="statPosts">--</div>
+                        <div class="stat-label">已发布文章</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="stat-value" id="statMessages">--</div>
+                        <div class="stat-label">未读消息</div>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <i class="fas fa-clock"></i>
+                    <span>最近活动</span>
+                </div>
+
+                <div class="cms-container">
+                    <div class="cms-loading" id="recentActivity">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">正在加载最近活动...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CMS内容管理 -->
+            <div id="cms-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <div>
+                        <h1 class="page-title">内容管理</h1>
+                        <p class="page-subtitle">使用Decap CMS管理您的网站内容</p>
+                    </div>
+                </div>
+
+                <div class="cms-container">
+                    <div id="nc-root"></div>
+                </div>
+            </div>
+
+            <!-- 网站设置 -->
+            <div id="settings-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <div>
+                        <h1 class="page-title">网站设置</h1>
+                        <p class="page-subtitle">管理网站的基本信息和全局配置</p>
+                    </div>
+                </div>
+
+                <div class="cms-container">
+                    <div class="cms-loading">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">正在加载网站设置...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 作品集管理 -->
+            <div id="portfolio-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <div>
+                        <h1 class="page-title">作品集管理</h1>
+                        <p class="page-subtitle">管理您的视频、摄影和品牌作品</p>
+                    </div>
+                </div>
+
+                <div class="cms-container">
+                    <div class="cms-loading">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">正在加载作品集...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文章管理 -->
+            <div id="posts-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <div>
+                        <h1 class="page-title">文章管理</h1>
+                        <p class="page-subtitle">管理您的文案技巧、案例拆解等文章</p>
+                    </div>
+                </div>
+
+                <div class="cms-container">
+                    <div class="cms-loading">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">正在加载文章列表...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 媒体库 -->
+            <div id="media-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <div>
+                        <h1 class="page-title">媒体库</h1>
+                        <p class="page-subtitle">管理您上传的图片、视频等媒体文件</p>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="uploadMediaBtn">
+                            <i class="fas fa-upload"></i>
+                            上传文件
+                        </button>
+                        <button class="btn btn-secondary" id="refreshMediaBtn">
+                            <i class="fas fa-sync-alt"></i>
+                            刷新
+                        </button>
+                    </div>
+                </div>
+
+                <div id="mediaUploadArea" style="display: none; margin-bottom: 24px;">
+                    <div class="cms-container">
+                        <div id="mediaDropzone" style="
+                            background: rgba(15, 23, 42, 0.6);
+                            border: 2px dashed rgba(99, 102, 241, 0.5);
+                            border-radius: 16px;
+                            padding: 48px;
+                            text-align: center;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        ">
+                            <div style="margin-bottom: 16px;">
+                                <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #818cf8;"></i>
+                            </div>
+                            <div style="color: #fff; font-size: 1.125rem; font-weight: 600; margin-bottom: 8px;">
+                                点击或拖拽文件到此处上传
+                            </div>
+                            <div style="color: #64748b; font-size: 0.875rem;">
+                                支持 JPG, PNG, GIF, WebP, MP4, WebM (最大 10MB)
+                            </div>
+                            <input type="file" id="mediaFileInput" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm" style="display: none;">
+                        </div>
+                        <div id="mediaUploadProgress" style="display: none; margin-top: 20px;">
+                            <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div id="mediaProgressBar" style="background: linear-gradient(90deg, #6366f1, #818cf8); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                            </div>
+                            <div id="mediaProgressText" style="color: #94a3b8; font-size: 0.875rem; margin-top: 8px;">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cms-container">
+                    <div id="mediaFileList" class="cms-loading">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">正在加载媒体库...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据分析 -->
+            <div id="analytics-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <div>
+                        <h1 class="page-title">数据分析</h1>
+                        <p class="page-subtitle">查看网站访问数据和用户行为分析</p>
+                    </div>
+                </div>
+
+                <div class="cms-container">
+                    <div class="cms-loading">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">正在加载分析数据...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="https://unpkg.com/decap-cms@3.1.0/dist/decap-cms.js"></script>
+    <!-- 通知组件 -->
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="notification-content">
+            <div class="notification-title" id="notificationTitle">操作成功</div>
+            <div class="notification-message" id="notificationMessage">设置已保存</div>
+        </div>
+        <button class="notification-close" id="notificationClose">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.CMS) {
-                console.log('Decap CMS loaded');
-                // CMS.init() is automatically called
+        // 全局变量
+        let currentUser = null;
+        let cmsInstance = null;
+        let settingsData = null;
+        let portfolioData = [];
+        let postsData = [];
+
+        // 初始化函数
+        function init() {
+            initSupabaseAuth();
+            setupNavigation();
+            setupButtons();
+            loadStatistics();
+            document.getElementById('notificationClose').addEventListener('click', hideNotification);
+        }
+
+        // 初始化Supabase认证
+        function initSupabaseAuth() {
+            if (window.supabase) {
+                window.supabase.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_IN' && session) {
+                        currentUser = session.user;
+                        updateUserInfo(session.user);
+                        showNotification('success', '登录成功', `欢迎回来，${session.user.email}`);
+
+                        initDecapCMS();
+                        initSupabaseService();
+                        loadAllData();
+                    } else if (event === 'SIGNED_OUT') {
+                        currentUser = null;
+                        window.location.href = '/admin/login-supabase.html';
+                    }
+                });
+
+                window.supabase.auth.getSession().then(({ data: { session } }) => {
+                    if (!session) {
+                        window.location.href = '/admin/login-supabase.html';
+                    }
+                });
             } else {
-                console.error('Decap CMS not loaded');
+                showNotification('error', '认证错误', '无法加载认证服务，请刷新页面重试');
             }
-        });
+        }
+
+        function initSupabaseService() {
+            if (typeof SupabaseService !== 'undefined') {
+                window.supabaseService = new SupabaseService();
+                const config = {
+                    supabaseUrl: window.APP_CONFIG?.supabaseUrl || 'YOUR_SUPABASE_URL',
+                    supabaseAnonKey: window.APP_CONFIG?.supabaseAnonKey || 'YOUR_SUPABASE_ANON_KEY'
+                };
+
+                if (config.supabaseUrl !== 'YOUR_SUPABASE_URL' && config.supabaseAnonKey !== 'YOUR_SUPABASE_ANON_KEY') {
+                    window.supabaseService.init(config.supabaseUrl, config.supabaseAnonKey).then(success => {
+                        if (success) {
+                            console.log('Supabase 服务初始化成功');
+                            if (typeof MediaService !== 'undefined') {
+                                window.mediaService = new MediaService(window.supabaseService);
+                            }
+                        }
+                    });
+                } else {
+                    console.log('Supabase 未配置，使用本地JSON数据');
+                }
+            }
+        }
+
+        // 加载所有数据
+        async function loadAllData() {
+            try {
+                await Promise.all([
+                    loadSettings(),
+                    loadPortfolio(),
+                    loadPosts(),
+                    loadStatistics()
+                ]);
+                showNotification('success', '数据加载', '所有数据加载完成');
+            } catch (error) {
+                console.error('数据加载失败:', error);
+                showNotification('error', '数据加载失败', '部分数据加载失败，请刷新页面重试');
+            }
+        }
+
+        // 加载网站设置
+        async function loadSettings() {
+            try {
+                const response = await fetch('../content/settings/general.json');
+                if (!response.ok) throw new Error('Failed to load settings');
+                settingsData = await response.json();
+                renderSettingsSection();
+                return settingsData;
+            } catch (error) {
+                console.error('加载网站设置失败:', error);
+                return null;
+            }
+        }
+
+        // 渲染网站设置界面
+        function renderSettingsSection() {
+            const container = document.querySelector('#settings-section .cms-container');
+            if (!settingsData) {
+                container.innerHTML = '<div class="cms-loading"><p class="loading-text">暂无数据</p></div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="padding: 24px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-globe" style="color: #818cf8; font-size: 1.5rem;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; color: #fff;">网站标题</div>
+                                    <div style="color: #94a3b8; font-size: 0.875rem;">${settingsData.siteTitle || '未设置'}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(168, 85, 247, 0.2); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-info-circle" style="color: #a855f7; font-size: 1.5rem;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; color: #fff;">网站描述</div>
+                                    <div style="color: #94a3b8; font-size: 0.875rem;">${settingsData.siteDescription || '未设置'}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(34, 197, 94, 0.2); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-envelope" style="color: #22c55e; font-size: 1.5rem;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; color: #fff;">邮箱</div>
+                                    <div style="color: #94a3b8; font-size: 0.875rem;">${settingsData.email || '未设置'}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(249, 115, 22, 0.2); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-map-marker-alt" style="color: #f97316; font-size: 1.5rem;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; color: #fff;">地址</div>
+                                    <div style="color: #94a3b8; font-size: 0.875rem;">${settingsData.address || '未设置'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 24px;">
+                        <h3 style="color: #fff; margin-bottom: 16px; font-size: 1.125rem;">
+                            <i class="fas fa-share-alt" style="color: #818cf8; margin-right: 8px;"></i>社交媒体
+                        </h3>
+                        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                            ${settingsData.social?.bilibili ? `
+                                <a href="${settingsData.social.bilibili}" target="_blank" style="padding: 10px 16px; background: rgba(251, 146, 60, 0.2); color: #fb923c; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-play-circle"></i>B站
+                                </a>
+                            ` : ''}
+                            ${settingsData.social?.douyin ? `
+                                <a href="${settingsData.social.douyin}" target="_blank" style="padding: 10px 16px; background: rgba(34, 197, 94, 0.2); color: #22c55e; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-music"></i>抖音
+                                </a>
+                            ` : ''}
+                            ${settingsData.social?.xiaohongshu ? `
+                                <a href="${settingsData.social.xiaohongshu}" target="_blank" style="padding: 10px 16px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-book"></i>小红书
+                                </a>
+                            ` : ''}
+                            ${settingsData.social?.weibo ? `
+                                <a href="${settingsData.social.weibo}" target="_blank" style="padding: 10px 16px; background: rgba(249, 115, 22, 0.2); color: #f97316; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-comments"></i>微博
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <p style="color: #64748b; font-size: 0.875rem;">
+                            <i class="fas fa-edit" style="margin-right: 4px;"></i>
+                            如需修改设置，请使用上方的"内容管理"模块中的Decap CMS进行编辑
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 加载作品集
+        async function loadPortfolio() {
+            try {
+                const response = await fetch('../content/portfolio/city-timelapse.json');
+                if (!response.ok) throw new Error('Failed to load portfolio');
+                const data = await response.json();
+                portfolioData = Array.isArray(data) ? data : [data];
+                renderPortfolioSection();
+                return portfolioData;
+            } catch (error) {
+                console.error('加载作品集失败:', error);
+                portfolioData = [];
+                renderPortfolioSection();
+                return [];
+            }
+        }
+
+        // 渲染作品集界面
+        function renderPortfolioSection() {
+            const container = document.querySelector('#portfolio-section .cms-container');
+            if (portfolioData.length === 0) {
+                container.innerHTML = '<div class="cms-loading"><p class="loading-text">暂无作品数据</p></div>';
+                return;
+            }
+
+            const itemsHtml = portfolioData.map(item => {
+                const categoryColors = {
+                    'video': 'rgba(99, 102, 241, 0.2)',
+                    'photo': 'rgba(34, 197, 94, 0.2)',
+                    'brand': 'rgba(249, 115, 22, 0.2)'
+                };
+                const categoryTextColors = {
+                    'video': '#818cf8',
+                    'photo': '#22c55e',
+                    'brand': '#f97316'
+                };
+                const bgColor = categoryColors[item.category] || 'rgba(99, 102, 241, 0.2)';
+                const textColor = categoryTextColors[item.category] || '#818cf8';
+                const categoryLabels = {
+                    'video': '视频',
+                    'photo': '摄影',
+                    'brand': '品牌'
+                };
+
+                return `
+                    <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease;">
+                        <div style="height: 160px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.3)); display: flex; align-items: center; justify-content: center; position: relative;">
+                            ${item.cover ? `<img src="${item.cover}" style="width: 100%; height: 100%; object-fit: cover;" />` : '<i class="fas fa-image" style="font-size: 3rem; color: #64748b;"></i>'}
+                            <span style="position: absolute; top: 12px; right: 12px; padding: 4px 12px; background: ${bgColor}; color: ${textColor}; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+                                ${categoryLabels[item.category] || item.category}
+                            </span>
+                        </div>
+                        <div style="padding: 16px;">
+                            <h3 style="color: #fff; font-size: 1rem; margin-bottom: 8px;">${item.title || '未命名作品'}</h3>
+                            <p style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 12px;">${item.description || '暂无描述'}</p>
+                            <div style="display: flex; gap: 16px; color: #64748b; font-size: 0.75rem;">
+                                <span><i class="fas fa-eye" style="margin-right: 4px;"></i>${item.views || 0}</span>
+                                <span><i class="fas fa-heart" style="margin-right: 4px;"></i>${item.likes || 0}</span>
+                                <span><i class="fas fa-calendar" style="margin-right: 4px;"></i>${item.year || '2024'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div style="padding: 24px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                        ${itemsHtml}
+                    </div>
+                    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <p style="color: #64748b; font-size: 0.875rem;">
+                            <i class="fas fa-edit" style="margin-right: 4px;"></i>
+                            如需添加或编辑作品，请使用上方的"内容管理"模块中的Decap CMS进行操作
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 加载文章
+        async function loadPosts() {
+            try {
+                const response = await fetch('../content/posts/viral-copywriting.json');
+                if (!response.ok) throw new Error('Failed to load posts');
+                const data = await response.json();
+                postsData = Array.isArray(data) ? data : [data];
+                renderPostsSection();
+                return postsData;
+            } catch (error) {
+                console.error('加载文章失败:', error);
+                postsData = [];
+                renderPostsSection();
+                return [];
+            }
+        }
+
+        // 渲染文章界面
+            function renderPostsSection() {
+            const container = document.querySelector('#posts-section .cms-container');
+            if (postsData.length === 0) {
+                container.innerHTML = '<div class="cms-loading"><p class="loading-text">暂无文章数据</p></div>';
+                return;
+            }
+
+            const itemsHtml = postsData.map(item => {
+                const categoryColors = {
+                    '文案技巧': 'rgba(99, 102, 241, 0.2)',
+                    '案例拆解': 'rgba(168, 85, 247, 0.2)',
+                    '工具推荐': 'rgba(34, 197, 94, 0.2)',
+                    '剪辑教程': 'rgba(249, 115, 22, 0.2)',
+                    '摄影': 'rgba(34, 211, 238, 0.2)'
+                };
+                const textColor = categoryColors[item.category] || 'rgba(99, 102, 241, 0.2)';
+                const categoryColor = categoryColors[item.category] ? categoryColors[item.category].replace('0.2', '1') : '#818cf8';
+
+                return `
+                    <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease;">
+                        <div style="display: flex; gap: 16px;">
+                            ${item.cover ? `
+                                <div style="width: 120px; height: 80px; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
+                                    <img src="${item.cover}" style="width: 100%; height: 100%; object-fit: cover;" />
+                                </div>
+                            ` : ''}
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <span style="padding: 4px 10px; background: ${textColor}; color: ${categoryColor}; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+                                        ${item.category || '未分类'}
+                                    </span>
+                                    <span style="color: #64748b; font-size: 0.75rem;">
+                                        <i class="fas fa-clock" style="margin-right: 4px;"></i>${item.readTime || 5}分钟
+                                    </span>
+                                </div>
+                                <h3 style="color: #fff; font-size: 1rem; margin-bottom: 8px;">${item.title || '未命名文章'}</h3>
+                                <p style="color: #94a3b8; font-size: 0.875rem;">${item.excerpt || '暂无摘要'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div style="padding: 24px;">
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        ${itemsHtml}
+                    </div>
+                    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <p style="color: #64748b; font-size: 0.875rem;">
+                            <i class="fas fa-edit" style="margin-right: 4px;"></i>
+                            如需添加或编辑文章，请使用上方的"内容管理"模块中的Decap CMS进行操作
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 渲染媒体库界面
+        function renderMediaSection() {
+            const container = document.querySelector('#mediaFileList');
+            const mediaFiles = [
+                { name: 'hero-banner.jpg', type: 'image', size: '2.4 MB', date: '2024-01-15' },
+                { name: 'portfolio-cover.png', type: 'image', size: '1.8 MB', date: '2024-01-14' },
+                { name: 'video-intro.mp4', type: 'video', size: '45.2 MB', date: '2024-01-13' },
+                { name: 'profile-avatar.jpg', type: 'image', size: '156 KB', date: '2024-01-12' },
+                { name: 'behind-scenes.jpg', type: 'image', size: '3.1 MB', date: '2024-01-11' },
+                { name: 'thumbnail-01.png', type: 'image', size: '890 KB', date: '2024-01-10' }
+            ];
+
+            if (typeof MediaService !== 'undefined' && window.supabaseService) {
+                loadMediaFromDatabase();
+                return;
+            }
+
+            const filesHtml = mediaFiles.map((file, index) => {
+                const iconBg = file.type === 'video' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(99, 102, 241, 0.2)';
+                const iconColor = file.type === 'video' ? '#ef4444' : '#818cf8';
+                const icon = file.type === 'video' ? 'fa-video' : 'fa-image';
+
+                return `
+                    <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 16px; transition: all 0.3s ease;">
+                        <div style="width: 56px; height: 56px; border-radius: 8px; background: ${iconBg}; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas ${icon}" style="color: ${iconColor}; font-size: 1.5rem;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="color: #fff; font-weight: 500; margin-bottom: 4px;">${file.name}</div>
+                            <div style="color: #64748b; font-size: 0.75rem;">${file.size} · ${file.date}</div>
+                        </div>
+                        <button onclick="deleteMediaItem(${index})" style="padding: 8px 16px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div style="padding: 24px;">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        ${filesHtml}
+                    </div>
+                    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <p style="color: #64748b; font-size: 0.875rem;">
+                            <i class="fas fa-info-circle" style="margin-right: 4px;"></i>
+                            ${typeof MediaService !== 'undefined' && window.supabaseService ? '已连接数据库，点击上传按钮添加新文件' : '配置Supabase和Cloudinary以启用完整的上传功能'}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadMediaFromDatabase() {
+            const container = document.querySelector('#mediaFileList');
+            container.innerHTML = '<div class="cms-loading"><div class="loading-spinner"></div><p class="loading-text">正在加载媒体库...</p></div>';
+
+            try {
+                const mediaService = new MediaService(window.supabaseService);
+                const files = await mediaService.getAll();
+                window.mediaFiles = files;
+
+                if (files.length === 0) {
+                    container.innerHTML = '<div style="padding: 48px; text-align: center; color: #64748b;">暂无媒体文件，点击上方"上传文件"按钮添加</div>';
+                    return;
+                }
+
+                const filesHtml = files.map((file, index) => {
+                    const iconBg = file.type === 'video' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(99, 102, 241, 0.2)';
+                    const iconColor = file.type === 'video' ? '#ef4444' : '#818cf8';
+                    const icon = file.type === 'video' ? 'fa-video' : 'fa-image';
+                    const fileSize = file.size ? formatFileSize(file.size) : '未知';
+
+                    return `
+                        <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 16px; transition: all 0.3s ease;">
+                            ${file.type === 'image' ? `
+                                <img src="${file.url}" style="width: 56px; height: 56px; border-radius: 8px; object-fit: cover;" />
+                            ` : `
+                                <div style="width: 56px; height: 56px; border-radius: 8px; background: ${iconBg}; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas ${icon}" style="color: ${iconColor}; font-size: 1.5rem;"></i>
+                                </div>
+                            `}
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="color: #fff; font-weight: 500; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${file.name}</div>
+                                <div style="color: #64748b; font-size: 0.75rem;">${fileSize} · ${new Date(file.created_at).toLocaleDateString()}</div>
+                            </div>
+                            <button onclick="deleteMediaFromDatabase('${file.id}')" style="padding: 8px 16px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = `<div style="padding: 24px;"><div style="display: flex; flex-direction: column; gap: 12px;">${filesHtml}</div></div>`;
+
+            } catch (error) {
+                console.error('加载媒体失败:', error);
+                container.innerHTML = '<div style="padding: 48px; text-align: center; color: #ef4444;">加载失败，请刷新重试</div>';
+            }
+        }
+
+        async function deleteMediaFromDatabase(id) {
+            if (!confirm('确定要删除这个文件吗？')) return;
+
+            try {
+                const mediaService = new MediaService(window.supabaseService);
+                await mediaService.delete(id);
+                showNotification('success', '删除成功', '文件已从数据库删除');
+                loadMediaFromDatabase();
+            } catch (error) {
+                console.error('删除失败:', error);
+                showNotification('error', '删除失败', error.message);
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes) return '未知';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function setupMediaUpload() {
+            const uploadBtn = document.getElementById('uploadMediaBtn');
+            const uploadArea = document.getElementById('mediaUploadArea');
+            const dropzone = document.getElementById('mediaDropzone');
+            const fileInput = document.getElementById('mediaFileInput');
+
+            if (uploadBtn) {
+                uploadBtn.addEventListener('click', () => {
+                    uploadArea.style.display = uploadArea.style.display === 'none' ? 'block' : 'none';
+                });
+            }
+
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => {
+                    loadMediaFromDatabase();
+                });
+            }
+
+            if (dropzone) {
+                dropzone.addEventListener('click', () => fileInput.click());
+
+                dropzone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropzone.style.borderColor = '#818cf8';
+                    dropzone.style.background = 'rgba(99, 102, 241, 0.1)';
+                });
+
+                dropzone.addEventListener('dragleave', () => {
+                    dropzone.style.borderColor = 'rgba(99, 102, 241, 0.5)';
+                    dropzone.style.background = 'transparent';
+                });
+
+                dropzone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropzone.style.borderColor = 'rgba(99, 102, 241, 0.5)';
+                    dropzone.style.background = 'transparent';
+                    handleMediaFiles(e.dataTransfer.files);
+                });
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    handleMediaFiles(e.target.files);
+                });
+            }
+        }
+
+        async function handleMediaFiles(fileList) {
+            const files = Array.from(fileList);
+            const maxSize = 10 * 1024 * 1024;
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
+
+            const progressContainer = document.getElementById('mediaUploadProgress');
+            const progressBar = document.getElementById('mediaProgressBar');
+            const progressText = document.getElementById('mediaProgressText');
+
+            for (const file of files) {
+                if (file.size > maxSize) {
+                    showNotification('error', '文件过大', `${file.name} 超过10MB限制`);
+                    continue;
+                }
+
+                if (!allowedTypes.includes(file.type)) {
+                    showNotification('error', '文件类型不支持', `${file.name} 文件类型不正确`);
+                    continue;
+                }
+
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressText.textContent = `正在上传 ${file.name}...`;
+
+                try {
+                    if (typeof CloudinaryService !== 'undefined') {
+                        const cloudinary = new CloudinaryService();
+                        const result = await uploadToCloudinaryDirect(file);
+                        progressBar.style.width = '100%';
+                        progressText.textContent = '上传完成!';
+
+                        if (window.supabaseService) {
+                            const mediaService = new MediaService(window.supabaseService);
+                            await mediaService.upload(file, 'media');
+                        }
+
+                        showNotification('success', '上传成功', `${file.name} 已上传`);
+                    } else {
+                        showNotification('info', '上传模拟', `模拟上传 ${file.name}（需要配置Cloudinary）`);
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                } catch (error) {
+                    console.error('上传失败:', error);
+                    showNotification('error', '上传失败', error.message);
+                }
+            }
+
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+                loadMediaFromDatabase();
+            }, 1500);
+        }
+
+        async function uploadToCloudinaryDirect(file) {
+            const cloudName = window.APP_CONFIG?.cloudinaryCloudName || 'YOUR_CLOUD_NAME';
+            const uploadPreset = window.APP_CONFIG?.cloudinaryUploadPreset || 'ml_default';
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', uploadPreset);
+            formData.append('folder', 'media');
+
+            const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
+
+            const response = await fetch(
+                `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+                {
+                    method: 'POST',
+                    body: formData
+                }
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'Upload failed');
+            }
+
+            return await response.json();
+        }
+
+        // 渲染数据分析界面
+        function renderAnalyticsSection() {
+            const container = document.querySelector('#analytics-section .cms-container');
+
+            const portfolioTotalViews = portfolioData.reduce((sum, item) => sum + parseInt(item.views || 0), 0);
+            const portfolioTotalLikes = portfolioData.reduce((sum, item) => sum + parseInt(item.likes || 0), 0);
+
+            container.innerHTML = `
+                <div style="padding: 24px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px;">
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 700; color: #818cf8; margin-bottom: 8px;">${portfolioData.length}</div>
+                            <div style="color: #94a3b8; font-size: 0.875rem;">作品数量</div>
+                        </div>
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 700; color: #22c55e; margin-bottom: 8px;">${portfolioTotalViews.toLocaleString()}</div>
+                            <div style="color: #94a3b8; font-size: 0.875rem;">总浏览量</div>
+                        </div>
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 700; color: #f97316; margin-bottom: 8px;">${portfolioTotalLikes.toLocaleString()}</div>
+                            <div style="color: #94a3b8; font-size: 0.875rem;">总点赞数</div>
+                        </div>
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 700; color: #a855f7; margin-bottom: 8px;">${postsData.length}</div>
+                            <div style="color: #94a3b8; font-size: 0.875rem;">文章数量</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <h3 style="color: #fff; margin-bottom: 16px; font-size: 1rem;">
+                            <i class="fas fa-fire" style="color: #f97316; margin-right: 8px;"></i>热门作品排行
+                        </h3>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            ${portfolioData.sort((a, b) => parseInt(b.views || 0) - parseInt(a.views || 0)).slice(0, 5).map((item, index) => `
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                                    <span style="width: 24px; height: 24px; border-radius: 50%; background: ${index < 3 ? 'rgba(251, 146, 60, 0.2)' : 'rgba(255, 255, 255, 0.1)'}; color: ${index < 3 ? '#fb923c' : '#94a3b8'}; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600;">
+                                        ${index + 1}
+                                    </span>
+                                    <div style="flex: 1; color: #fff; font-size: 0.875rem;">${item.title || '未命名'}</div>
+                                    <div style="color: #64748b; font-size: 0.75rem;"><i class="fas fa-eye" style="margin-right: 4px;"></i>${item.views || 0}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <p style="color: #64748b; font-size: 0.875rem;">
+                            <i class="fas fa-chart-line" style="margin-right: 4px;"></i>
+                            更详细的分析数据请访问 Netlify Analytics 面板
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 更新用户信息
+        function updateUserInfo(user) {
+            const avatar = document.getElementById('userAvatar');
+            const name = document.getElementById('userName');
+            const email = document.getElementById('userEmail');
+            
+            // 设置头像
+            if (user.user_metadata?.avatar_url) {
+                avatar.style.backgroundImage = `url(${user.user_metadata.avatar_url})`;
+                avatar.style.backgroundSize = 'cover';
+                avatar.textContent = '';
+            } else {
+                const initials = user.email ? user.email.charAt(0).toUpperCase() : '?';
+                avatar.textContent = initials;
+            }
+            
+            // 设置姓名和邮箱
+            name.textContent = user.user_metadata?.full_name || user.email.split('@')[0];
+            email.textContent = user.email;
+        }
+
+        // 初始化Decap CMS
+        function initDecapCMS() {
+            if (window.CMS) {
+                try {
+                    // 初始化CMS
+                    cmsInstance = window.CMS.init();
+                    
+                    // 监听CMS事件
+                    window.CMS.registerEventListener({
+                        type: 'preSave',
+                        handler: ({ entry }) => {
+                            console.log('保存前:', entry);
+                            return entry;
+                        }
+                    });
+                    
+                    window.CMS.registerEventListener({
+                        type: 'postSave',
+                        handler: ({ entry }) => {
+                            showNotification('success', '保存成功', '内容已成功保存');
+                            console.log('保存后:', entry);
+                        }
+                    });
+                    
+                    console.log('Decap CMS初始化成功');
+                } catch (error) {
+                    console.error('Decap CMS初始化失败:', error);
+                    showNotification('error', 'CMS错误', '内容管理系统初始化失败');
+                }
+            } else {
+                console.error('Decap CMS未加载');
+                showNotification('error', 'CMS错误', '内容管理系统未加载，请检查网络连接');
+            }
+        }
+
+        // 设置导航切换
+        function setupNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const section = this.dataset.section;
+
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                    });
+                    this.classList.add('active');
+
+                    document.querySelectorAll('.content-section').forEach(sec => {
+                        sec.style.display = 'none';
+                    });
+
+                    const targetSection = document.getElementById(`${section}-section`);
+                    targetSection.style.display = 'block';
+
+                    if (section === 'media') {
+                        renderMediaSection();
+                    } else if (section === 'analytics') {
+                        renderAnalyticsSection();
+                    } else if (section === 'settings') {
+                        renderSettingsSection();
+                    } else if (section === 'portfolio') {
+                        renderPortfolioSection();
+                    } else if (section === 'posts') {
+                        renderPostsSection();
+                    }
+
+                    showNotification('info', '页面切换', `已切换到${this.querySelector('span').textContent}`);
+                });
+            });
+        }
+
+        // 设置按钮事件
+        function setupButtons() {
+            document.getElementById('refreshStats').addEventListener('click', loadStatistics);
+
+            document.getElementById('quickAction').addEventListener('click', function() {
+                showNotification('info', '快速操作', '请选择要执行的操作');
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', async function() {
+                if (confirm('确定要退出登录吗？')) {
+                    await window.supabase.auth.signOut();
+                }
+            });
+
+            setupMediaUpload();
+        }
+
+        // 加载统计数据
+        function loadStatistics() {
+            // 模拟加载数据
+            document.getElementById('statVisits').textContent = '1,248';
+            document.getElementById('statLikes').textContent = '356';
+            document.getElementById('statPosts').textContent = '24';
+            document.getElementById('statMessages').textContent = '89';
+            
+            // 模拟加载最近活动
+            const activityContainer = document.getElementById('recentActivity');
+            activityContainer.innerHTML = `
+                <div style="padding: 24px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; color: #818cf8;">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: #fff;">文章发布</div>
+                            <div style="font-size: 0.875rem; color: #94a3b8;">《短视频剪辑的5个核心技巧》</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">10:30 今天</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(34, 197, 94, 0.2); display: flex; align-items: center; justify-content: center; color: #22c55e;">
+                            <i class="fas fa-images"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: #fff;">作品上传</div>
+                            <div style="font-size: 0.875rem; color: #94a3b8;">城市延时摄影作品</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">09:15 今天</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(249, 115, 22, 0.2); display: flex; align-items: center; justify-content: center; color: #f97316;">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: #fff;">设置更新</div>
+                            <div style="font-size: 0.875rem; color: #94a3b8;">更新了网站描述信息</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">昨天 16:45</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showNotification('success', '数据更新', '统计数据已刷新');
+        }
+
+        // 显示通知
+        function showNotification(type, title, message) {
+            const notification = document.getElementById('notification');
+            const notificationTitle = document.getElementById('notificationTitle');
+            const notificationMessage = document.getElementById('notificationMessage');
+            const notificationIcon = notification.querySelector('.notification-icon i');
+            
+            // 设置通知内容
+            notificationTitle.textContent = title;
+            notificationMessage.textContent = message;
+            
+            // 设置通知样式
+            notification.className = 'notification';
+            notification.classList.add(type);
+            
+            // 设置图标
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle'
+            };
+            
+            notificationIcon.className = `fas ${icons[type] || 'fa-info-circle'}`;
+            
+            // 显示通知
+            notification.classList.add('show');
+            
+            // 5秒后自动隐藏
+            setTimeout(hideNotification, 5000);
+        }
+
+        // 隐藏通知
+        function hideNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.remove('show');
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>

@@ -11,8 +11,6 @@ display_url: https://my-project.g206321634.workers.dev
 media_folder: "images"
 public_folder: "/images"
 
-
-
 collections:
   - name: "settings"
     label: "网站设置"

@@ -1,0 +1,105 @@
+2026-03-26T13:07:13.413Z	Initializing build environment...
+2026-03-26T13:07:14.912Z	Success: Finished initializing build environment
+2026-03-26T13:07:16.237Z	Cloning repository...
+2026-03-26T13:07:17.642Z	No build output detected to cache. Skipping.
+2026-03-26T13:07:17.642Z	No dependencies detected to cache. Skipping.
+2026-03-26T13:07:17.647Z	Detected the following tools from environment: bun@1.2.15, nodejs@22.16.0
+2026-03-26T13:07:17.649Z	Installing project dependencies: bun install
+2026-03-26T13:07:17.847Z	bun install v1.2.15 (df017990)
+2026-03-26T13:07:17.882Z	Resolving dependencies
+2026-03-26T13:07:17.965Z	Resolved, downloaded and extracted [4]
+2026-03-26T13:07:17.971Z	Saved lockfile
+2026-03-26T13:07:17.971Z	
+2026-03-26T13:07:17.971Z	+ nodemailer@6.10.1 (v8.0.4 available)
+2026-03-26T13:07:17.972Z	
+2026-03-26T13:07:17.972Z	1 package installed [170.00ms]
+2026-03-26T13:07:18.074Z	Executing user deploy command: npx wrangler deploy
+2026-03-26T13:07:19.886Z	npm warn exec The following package was not found and will be installed: wrangler@4.77.0
+2026-03-26T13:07:29.321Z	
+2026-03-26T13:07:29.322Z	 ⛅️ wrangler 4.77.0
+2026-03-26T13:07:29.322Z	───────────────────
+2026-03-26T13:07:29.455Z	
+2026-03-26T13:07:29.457Z	Detected Project Settings:
+2026-03-26T13:07:29.457Z	 - Worker Name: my-project
+2026-03-26T13:07:29.461Z	 - Framework: Static
+2026-03-26T13:07:29.461Z	 - Build Command: bunx hugo
+2026-03-26T13:07:29.462Z	 - Output Directory: public
+2026-03-26T13:07:29.463Z	
+2026-03-26T13:07:29.464Z	? Do you want to modify these settings?
+2026-03-26T13:07:29.465Z	🤖 Using fallback value in non-interactive context: no
+2026-03-26T13:07:29.466Z	
+2026-03-26T13:07:29.469Z	📦 Install packages:
+2026-03-26T13:07:29.472Z	 - wrangler (devDependency)
+2026-03-26T13:07:29.472Z	
+2026-03-26T13:07:29.472Z	📝 Update package.json scripts:
+2026-03-26T13:07:29.472Z	 - "deploy": "bunx hugo && wrangler deploy"
+2026-03-26T13:07:29.472Z	 - "preview": "bunx hugo && wrangler dev"
+2026-03-26T13:07:29.472Z	
+2026-03-26T13:07:29.472Z	📄 Create wrangler.jsonc:
+2026-03-26T13:07:29.472Z	  {
+2026-03-26T13:07:29.473Z	    "$schema": "node_modules/wrangler/config-schema.json",
+2026-03-26T13:07:29.473Z	    "name": "my-project",
+2026-03-26T13:07:29.473Z	    "compatibility_date": "2025-09-27",
+2026-03-26T13:07:29.474Z	    "observability": {
+2026-03-26T13:07:29.477Z	      "enabled": true
+2026-03-26T13:07:29.477Z	    },
+2026-03-26T13:07:29.477Z	    "assets": {
+2026-03-26T13:07:29.477Z	      "directory": "public"
+2026-03-26T13:07:29.481Z	    },
+2026-03-26T13:07:29.482Z	    "compatibility_flags": [
+2026-03-26T13:07:29.483Z	      "nodejs_compat"
+2026-03-26T13:07:29.484Z	    ]
+2026-03-26T13:07:29.485Z	  }
+2026-03-26T13:07:29.485Z	
+2026-03-26T13:07:29.485Z	? Proceed with setup?
+2026-03-26T13:07:29.485Z	🤖 Using fallback value in non-interactive context: yes
+2026-03-26T13:07:32.569Z	├ Adding Wrangler files to the .gitignore file
+2026-03-26T13:07:32.570Z	│ created .gitignore file
+2026-03-26T13:07:32.570Z	│
+2026-03-26T13:07:32.570Z	[build] Running: bunx hugo
+2026-03-26T13:07:33.014Z	[build] Start building sites … 
+2026-03-26T13:07:33.014Z	[build] hugo v0.147.7-189453612e4bedc4f27495a7b1145321c8d89807+extended linux/amd64 BuildDate=2025-05-31T12:41:12Z VendorInfo=gohugoio
+2026-03-26T13:07:33.014Z	[build] 
+2026-03-26T13:07:33.014Z	[build] 
+2026-03-26T13:07:33.038Z	[build] WARN  found no layout file for "html" for kind "home": You should create a template file which matches Hugo Layouts Lookup Rules for this combination.
+2026-03-26T13:07:33.043Z	[build] WARN  found no layout file for "html" for kind "taxonomy": You should create a template file which matches Hugo Layouts Lookup Rules for this combination.
+2026-03-26T13:07:33.043Z	[build] 
+2026-03-26T13:07:33.043Z	[build] WARN  found no layout file for "html" for kind "section": You should create a template file which matches Hugo Layouts Lookup Rules for this combination.
+2026-03-26T13:07:33.044Z	[build] WARN  found no layout file for "html" for kind "page": You should create a template file which matches Hugo Layouts Lookup Rules for this combination.
+2026-03-26T13:07:33.044Z	[build] 
+2026-03-26T13:07:33.044Z	[build] 
+2026-03-26T13:07:33.045Z	[build] 
+2026-03-26T13:07:33.046Z	[build]                   │ EN 
+2026-03-26T13:07:33.046Z	[build] ──────────────────┼────
+2026-03-26T13:07:33.047Z	[build]  Pages            │  6 
+2026-03-26T13:07:33.047Z	[build]  Paginator pages  │  0 
+2026-03-26T13:07:33.047Z	[build]  Non-page files   │  3 
+2026-03-26T13:07:33.047Z	[build]  Static files     │  1 
+2026-03-26T13:07:33.047Z	[build]  Processed images │  0 
+2026-03-26T13:07:33.047Z	[build]  Aliases          │  0 
+2026-03-26T13:07:33.047Z	[build]  Cleaned          │  0 
+2026-03-26T13:07:33.047Z	[build] 
+2026-03-26T13:07:33.047Z	[build] Total in 37 ms
+2026-03-26T13:07:33.047Z	[build] 
+2026-03-26T13:07:34.346Z	🌀 Building list of assets...
+2026-03-26T13:07:34.348Z	✨ Read 17 files from the assets directory /opt/buildhome/repo/public
+2026-03-26T13:07:34.353Z	🌀 Starting asset upload...
+2026-03-26T13:07:36.865Z	🌀 Found 1 new or modified static asset to upload. Proceeding with upload...
+2026-03-26T13:07:36.865Z	+ /_routes.json
+2026-03-26T13:07:38.217Z	Uploaded 1 of 1 asset
+2026-03-26T13:07:38.217Z	✨ Success! Uploaded 1 file (10 already uploaded) (1.35 sec)
+2026-03-26T13:07:38.217Z	
+2026-03-26T13:07:38.219Z	Total Upload: 19.04 KiB / gzip: 4.74 KiB
+2026-03-26T13:07:41.444Z	Uploaded my-project (7.50 sec)
+2026-03-26T13:07:42.635Z	Deployed my-project triggers (1.19 sec)
+2026-03-26T13:07:42.635Z	  https://my-project.g206321634.workers.dev
+2026-03-26T13:07:42.635Z	Current Version ID: f8aa0489-a509-4709-aedc-5572d4918ba5
+2026-03-26T13:07:42.641Z	
+2026-03-26T13:07:42.641Z	Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more at https://github.com/cloudflare/workers-sdk/tree/main/packages/wrangler/telemetry.md
+2026-03-26T13:07:42.774Z	Success: Deploy command completed
+2026-03-26T13:07:42.779Z	Skipping build output cache as it's not supported for your project
+2026-03-26T13:07:42.780Z	Uploading to dependency cache
+2026-03-26T13:07:42.783Z	No package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb! Build caching not supported
+2026-03-26T13:07:42.788Z	Failed to upload dependencies to build cache. Skipping.
+2026-03-26T13:07:42.895Z	✨ Success! Build completed.
+2026-03-26T13:07:42.910Z	Detected wrangler autoconfig generated changes to your project. Please run 'npx wrangler setup' in your repo and commit the changes.

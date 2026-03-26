@@ -1,0 +1,8 @@
+{
+  "supabaseUrl": "YOUR_SUPABASE_URL",
+  "supabaseAnonKey": "YOUR_SUPABASE_ANON_KEY",
+  "supabaseServiceKey": "YOUR_SUPABASE_SERVICE_ROLE_KEY",
+  "cloudinaryCloudName": "YOUR_CLOUDINARY_CLOUD_NAME",
+  "cloudinaryApiKey": "YOUR_CLOUDINARY_API_KEY",
+  "cloudinaryApiSecret": "YOUR_CLOUDINARY_API_SECRET"
+}
