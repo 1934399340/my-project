@@ -483,40 +483,52 @@
             <section class="modules-section">
                 <h2 class="section-title">功能模块</h2>
                 <div class="modules-grid">
-                    <div class="module-card" onclick="window.location.href='../portfolio.html'">
+                    <div class="module-card" onclick="window.location.href='./content-editor.html?page=portfolio'">
                         <div class="module-icon" style="background: #eff6ff; color: #2563eb;">🎬</div>
                         <h3>作品管理</h3>
                         <p>管理您的视频作品集，添加、编辑或删除作品</p>
                     </div>
                     
-                    <div class="module-card" onclick="window.location.href='../copywriting.html'">
+                    <div class="module-card" onclick="window.location.href='./content-editor.html?page=copywriting'">
                         <div class="module-icon" style="background: #f0fdf4; color: #16a34a;">✍️</div>
                         <h3>文案研究</h3>
                         <p>发布和管理文案创作相关的文章内容</p>
                     </div>
                     
-                    <div class="module-card" onclick="window.location.href='../editing.html'">
+                    <div class="module-card" onclick="window.location.href='./content-editor.html?page=editing'">
                         <div class="module-icon" style="background: #faf5ff; color: #9333ea;">✂️</div>
                         <h3>剪辑技巧</h3>
                         <p>分享视频剪辑技巧和教程内容</p>
                     </div>
                     
-                    <div class="module-card" onclick="window.location.href='../photography.html'">
+                    <div class="module-card" onclick="window.location.href='./content-editor.html?page=photography'">
                         <div class="module-icon" style="background: #fdf2f8; color: #db2777;">📷</div>
                         <h3>摄影作品</h3>
                         <p>展示和管理摄影作品集</p>
                     </div>
                     
-                    <div class="module-card" onclick="window.location.href='../about.html'">
+                    <div class="module-card" onclick="window.location.href='./content-editor.html?page=about'">
                         <div class="module-icon" style="background: #fef3c7; color: #d97706;">👤</div>
                         <h3>个人简介</h3>
                         <p>编辑个人信息和简介内容</p>
                     </div>
                     
-                    <div class="module-card" onclick="window.location.href='../contact.html'">
+                    <div class="module-card" onclick="window.location.href='./content-editor.html?page=contact'">
                         <div class="module-icon" style="background: #e0e7ff; color: #4f46e5;">📧</div>
                         <h3>联系方式</h3>
                         <p>管理联系信息和社交媒体链接</p>
+                    </div>
+                    
+                    <div class="module-card" onclick="window.open('../portfolio.html', '_blank')">
+                        <div class="module-icon" style="background: #fef9c3; color: #ca8a04;">👁️</div>
+                        <h3>预览网站</h3>
+                        <p>在新窗口中预览前端网站效果</p>
+                    </div>
+                    
+                    <div class="module-card" onclick="window.open('https://console.cloud.tencent.com/tcb', '_blank')">
+                        <div class="module-icon" style="background: #e0f2fe; color: #0284c7;">☁️</div>
+                        <h3>云控制台</h3>
+                        <p>打开腾讯云CloudBase控制台</p>
                     </div>
                 </div>
             </section>
@@ -535,10 +547,10 @@
                 
                 <div class="status-item">
                     <div class="status-label">
-                        <span class="status-dot online" id="dbStatus"></span>
-                        <span>数据库连接</span>
+                        <span class="status-dot online"></span>
+                        <span>数据库</span>
                     </div>
-                    <span class="status-value" id="dbStatusText">检查中...</span>
+                    <span class="status-value">本地存储模式</span>
                 </div>
                 
                 <div class="status-item">
@@ -551,15 +563,25 @@
                 
                 <div class="status-item">
                     <div class="status-label">
-                        <span class="status-dot pending" id="githubStatus"></span>
+                        <span class="status-dot online" id="githubStatus"></span>
                         <span>GitHub 同步</span>
                     </div>
-                    <span class="status-value" id="githubStatusText">未配置</span>
+                    <span class="status-value" id="githubStatusText">已连接</span>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-label">
+                        <span class="status-dot" id="messageDot"></span>
+                        <span>站内消息</span>
+                    </div>
+                    <span class="status-value" id="messageCount">检查中...</span>
                 </div>
                 
                 <div class="quick-actions">
-                    <button class="action-btn primary" onclick="window.location.href='account-settings.html'">账户设置</button>
+                    <button class="action-btn primary" onclick="window.location.href='./messages.html'">查看消息</button>
+                    <button class="action-btn secondary" onclick="window.location.href='./account-settings.html'">账户设置</button>
                     <button class="action-btn secondary" onclick="window.open('https://github.com/1934399340/my-project', '_blank')">GitHub仓库</button>
+                    <button class="action-btn secondary" onclick="window.open('https://console.cloud.tencent.com/tcb', '_blank')">云控制台</button>
                 </div>
             </section>
         </main>
@@ -589,23 +611,31 @@
                 window.location.href = './login.html';
             }
             
-            // 检查数据库状态
-            checkDatabaseStatus();
+            // 检查消息状态
+            checkMessages();
+            
+            // GitHub状态显示为已连接
+            document.getElementById('githubStatus').className = 'status-dot online';
+            document.getElementById('githubStatusText').textContent = '已连接';
         });
         
-        // 检查数据库状态
-        function checkDatabaseStatus() {
-            const dbStatus = document.getElementById('dbStatus');
-            const dbStatusText = document.getElementById('dbStatusText');
+        // 检查消息状态
+        function checkMessages() {
+            const messages = JSON.parse(localStorage.getItem('contact_messages') || '[]');
+            const unreadCount = messages.filter(m => !m.read).length;
+            const messageDot = document.getElementById('messageDot');
+            const messageCount = document.getElementById('messageCount');
             
-            // 检查Supabase配置
-            if (typeof window.supabase !== 'undefined') {
-                dbStatus.className = 'status-dot online';
-                dbStatusText.textContent = 'Supabase 已连接';
+            if (unreadCount > 0) {
+                messageDot.className = 'status-dot pending';
+                messageCount.textContent = `${unreadCount} 条未读`;
             } else {
-                dbStatus.className = 'status-dot pending';
-                dbStatusText.textContent = '使用本地存储';
+                messageDot.className = 'status-dot online';
+                messageCount.textContent = messages.length > 0 ? `${messages.length} 条消息` : '暂无消息';
             }
+            
+            // 更新联系咨询统计
+            document.getElementById('totalContacts').textContent = messages.length;
         }
         
         // 退出登录

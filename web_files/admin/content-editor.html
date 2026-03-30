@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容编辑 - CreatorHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #ec4899;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --gray-lighter: #cbd5e1;
+            --white: #ffffff;
+            --bg-light: #f8fafc;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-light);
+            color: var(--dark);
+            min-height: 100vh;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* 侧边栏 */
+        .sidebar {
+            width: 260px;
+            background: var(--dark);
+            color: var(--white);
+            padding: 24px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 24px;
+            margin-bottom: 32px;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            color: var(--gray-light);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+        }
+        
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-light);
+            border-right: 3px solid var(--primary);
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            padding: 10px 20px;
+            background: var(--bg-light);
+            border: 1px solid var(--gray-lighter);
+            border-radius: var(--radius);
+            color: var(--dark);
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .back-btn:hover {
+            background: var(--gray-lighter);
+        }
+        
+        /* 编辑区域 */
+        .edit-container {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .edit-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--gray-lighter);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .edit-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .edit-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--dark);
+            border: 1px solid var(--gray-lighter);
+        }
+        
+        .edit-body {
+            padding: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--gray-lighter);
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        /* 页面选择器 */
+        .page-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .page-card {
+            background: var(--white);
+            border: 2px solid var(--gray-lighter);
+            border-radius: var(--radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+        
+        .page-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .page-card.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .page-card-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        
+        .page-card-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .page-card-desc {
+            font-size: 13px;
+            color: var(--gray);
+        }
+        
+        /* 消息提示 */
+        .message {
+            padding: 16px 20px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.show {
+            display: block;
+        }
+        
+        .message.success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .message.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        /* 编辑器工具栏 */
+        .editor-toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--gray-lighter);
+            flex-wrap: wrap;
+        }
+        
+        .toolbar-btn {
+            padding: 8px 12px;
+            background: var(--white);
+            border: 1px solid var(--gray-lighter);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .toolbar-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* 预览区域 */
+        .preview-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--gray-lighter);
+        }
+        
+        .preview-frame {
+            width: 100%;
+            height: 500px;
+            border: 2px solid var(--gray-lighter);
+            border-radius: var(--radius);
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">✦</div>
+                <span class="logo-text">CreatorHub</span>
+            </div>
+            
+            <nav>
+                <a class="nav-item" href="./index.html">
+                    <span>📊</span>
+                    <span>仪表盘</span>
+                </a>
+                <a class="nav-item active" href="./content-editor.html">
+                    <span>📝</span>
+                    <span>内容编辑</span>
+                </a>
+                <a class="nav-item" href="./account-settings.html">
+                    <span>⚙️</span>
+                    <span>账户设置</span>
+                </a>
+                <a class="nav-item" id="logoutNav">
+                    <span>🚪</span>
+                    <span>退出登录</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- 主内容 -->
+        <main class="main-content">
+            <header class="header">
+                <h1>内容编辑器</h1>
+                <a href="./index.html" class="back-btn">← 返回仪表盘</a>
+            </header>
+            
+            <div id="message" class="message"></div>
+            
+            <!-- 页面选择 -->
+            <div class="edit-container" style="margin-bottom: 24px;">
+                <div class="edit-header">
+                    <h2 class="edit-title">选择要编辑的页面</h2>
+                </div>
+                <div class="edit-body">
+                    <div class="page-selector">
+                        <div class="page-card active" data-page="index">
+                            <div class="page-card-icon">🏠</div>
+                            <div class="page-card-title">首页</div>
+                            <div class="page-card-desc">编辑首页内容</div>
+                        </div>
+                        <div class="page-card" data-page="about">
+                            <div class="page-card-icon">👤</div>
+                            <div class="page-card-title">关于我</div>
+                            <div class="page-card-desc">个人简介</div>
+                        </div>
+                        <div class="page-card" data-page="portfolio">
+                            <div class="page-card-icon">🎬</div>
+                            <div class="page-card-title">作品集</div>
+                            <div class="page-card-desc">视频作品</div>
+                        </div>
+                        <div class="page-card" data-page="copywriting">
+                            <div class="page-card-icon">✍️</div>
+                            <div class="page-card-title">文案研究</div>
+                            <div class="page-card-desc">文章内容</div>
+                        </div>
+                        <div class="page-card" data-page="editing">
+                            <div class="page-card-icon">✂️</div>
+                            <div class="page-card-title">剪辑技巧</div>
+                            <div class="page-card-desc">教程内容</div>
+                        </div>
+                        <div class="page-card" data-page="photography">
+                            <div class="page-card-icon">📷</div>
+                            <div class="page-card-title">摄影</div>
+                            <div class="page-card-desc">摄影作品</div>
+                        </div>
+                        <div class="page-card" data-page="contact">
+                            <div class="page-card-icon">📧</div>
+                            <div class="page-card-title">联系我</div>
+                            <div class="page-card-desc">联系方式</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 编辑区域 -->
+            <div class="edit-container">
+                <div class="edit-header">
+                    <h2 class="edit-title" id="editorTitle">编辑首页内容</h2>
+                    <div class="edit-actions">
+                        <button class="btn btn-secondary" id="previewBtn">预览</button>
+                        <button class="btn btn-primary" id="saveBtn">保存更改</button>
+                    </div>
+                </div>
+                
+                <div class="editor-toolbar">
+                    <button class="toolbar-btn" onclick="insertTag('h1')">H1</button>
+                    <button class="toolbar-btn" onclick="insertTag('h2')">H2</button>
+                    <button class="toolbar-btn" onclick="insertTag('h3')">H3</button>
+                    <button class="toolbar-btn" onclick="insertTag('p')">段落</button>
+                    <button class="toolbar-btn" onclick="insertTag('strong')">粗体</button>
+                    <button class="toolbar-btn" onclick="insertTag('em')">斜体</button>
+                    <button class="toolbar-btn" onclick="insertLink()">链接</button>
+                    <button class="toolbar-btn" onclick="insertImage()">图片</button>
+                </div>
+                
+                <div class="edit-body">
+                    <div class="form-group">
+                        <label>页面标题 (Title)</label>
+                        <input type="text" id="pageTitle" placeholder="输入页面标题">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>页面描述 (Meta Description)</label>
+                        <input type="text" id="pageDescription" placeholder="输入页面描述，用于SEO">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>主标题 (H1)</label>
+                            <input type="text" id="mainHeading" placeholder="页面主标题">
+                        </div>
+                        <div class="form-group">
+                            <label>副标题</label>
+                            <input type="text" id="subHeading" placeholder="页面副标题">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>页面内容 (HTML)</label>
+                        <textarea id="pageContent" placeholder="在此编辑页面HTML内容..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>页面片段/简短描述</label>
+                        <textarea id="pageExcerpt" style="min-height: 100px;" placeholder="页面的简短描述，用于列表显示"></textarea>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 当前编辑的页面
+        let currentPage = 'index';
+        
+        // 页面数据存储
+        const pageData = {
+            index: {
+                title: 'CreatorHub - 创作者个人网站',
+                description: '创作者个人网站 - 作品集、文案研究、剪辑技巧、摄影分享',
+                mainHeading: '你好，我是李桂宇',
+                subHeading: '全栈视频创作者',
+                content: '<p>专注于内容创作与视觉表达，用镜头记录生活，用文案传递价值</p>',
+                excerpt: '创作者个人网站'
+            },
+            about: {
+                title: '关于我 - CreatorHub',
+                description: '了解更多关于李桂宇的信息',
+                mainHeading: '关于我',
+                subHeading: '创作者的故事',
+                content: '<p>这里填写关于我的详细内容...</p>',
+                excerpt: '关于创作者'
+            },
+            portfolio: {
+                title: '作品集 - CreatorHub',
+                description: '浏览我的视频作品集',
+                mainHeading: '我的作品',
+                subHeading: '精选视频作品',
+                content: '<p>作品集内容...</p>',
+                excerpt: '视频作品集'
+            },
+            copywriting: {
+                title: '文案研究 - CreatorHub',
+                description: '文案创作研究与分享',
+                mainHeading: '文案研究',
+                subHeading: '创作心得分享',
+                content: '<p>文案研究内容...</p>',
+                excerpt: '文案创作研究'
+            },
+            editing: {
+                title: '剪辑技巧 - CreatorHub',
+                description: '视频剪辑技巧与教程',
+                mainHeading: '剪辑技巧',
+                subHeading: '从入门到精通',
+                content: '<p>剪辑技巧内容...</p>',
+                excerpt: '视频剪辑教程'
+            },
+            photography: {
+                title: '摄影作品 - CreatorHub',
+                description: '摄影作品展示',
+                mainHeading: '摄影作品',
+                subHeading: '光影的艺术',
+                content: '<p>摄影作品内容...</p>',
+                excerpt: '摄影作品展示'
+            },
+            contact: {
+                title: '联系我 - CreatorHub',
+                description: '与我取得联系',
+                mainHeading: '联系我',
+                subHeading: '期待与您合作',
+                content: '<p>联系方式内容...</p>',
+                excerpt: '联系方式'
+            }
+        };
+        
+        // DOM元素
+        const messageEl = document.getElementById('message');
+        const editorTitle = document.getElementById('editorTitle');
+        const pageTitle = document.getElementById('pageTitle');
+        const pageDescription = document.getElementById('pageDescription');
+        const mainHeading = document.getElementById('mainHeading');
+        const subHeading = document.getElementById('subHeading');
+        const pageContent = document.getElementById('pageContent');
+        const pageExcerpt = document.getElementById('pageExcerpt');
+        
+        // 显示消息
+        function showMessage(type, text) {
+            messageEl.className = 'message show ' + type;
+            messageEl.textContent = text;
+            setTimeout(() => {
+                messageEl.className = 'message';
+            }, 3000);
+        }
+        
+        // 加载页面数据
+        function loadPageData(page) {
+            const data = pageData[page] || {};
+            pageTitle.value = data.title || '';
+            pageDescription.value = data.description || '';
+            mainHeading.value = data.mainHeading || '';
+            subHeading.value = data.subHeading || '';
+            pageContent.value = data.content || '';
+            pageExcerpt.value = data.excerpt || '';
+            
+            // 更新标题
+            const pageNames = {
+                index: '首页',
+                about: '关于我',
+                portfolio: '作品集',
+                copywriting: '文案研究',
+                editing: '剪辑技巧',
+                photography: '摄影',
+                contact: '联系我'
+            };
+            editorTitle.textContent = `编辑${pageNames[page]}内容`;
+        }
+        
+        // 保存页面数据
+        function savePageData() {
+            pageData[currentPage] = {
+                title: pageTitle.value,
+                description: pageDescription.value,
+                mainHeading: mainHeading.value,
+                subHeading: subHeading.value,
+                content: pageContent.value,
+                excerpt: pageExcerpt.value
+            };
+            
+            // 保存到localStorage
+            localStorage.setItem('page_content_data', JSON.stringify(pageData));
+            
+            showMessage('success', '✅ 内容已保存！点击"应用到网站"将更新到前端页面。');
+        }
+        
+        // 插入标签
+        function insertTag(tag) {
+            const textarea = pageContent;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selectedText = text.substring(start, end);
+            
+            let newText;
+            if (tag === 'p' || tag === 'h1' || tag === 'h2' || tag === 'h3') {
+                newText = `<${tag}>${selectedText || '在此输入内容'}</${tag}>`;
+            } else if (tag === 'strong' || tag === 'em') {
+                newText = `<${tag}>${selectedText || '文本'}</${tag}>`;
+            }
+            
+            textarea.value = text.substring(0, start) + newText + text.substring(end);
+            textarea.focus();
+        }
+        
+        // 插入链接
+        function insertLink() {
+            const url = prompt('请输入链接地址：', 'https://');
+            if (url) {
+                const textarea = pageContent;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+                const selectedText = text.substring(start, end) || '链接文字';
+                
+                textarea.value = text.substring(0, start) + `<a href="${url}">${selectedText}</a>` + text.substring(end);
+            }
+        }
+        
+        // 插入图片
+        function insertImage() {
+            const url = prompt('请输入图片地址：', 'https://');
+            if (url) {
+                const alt = prompt('请输入图片描述：', '图片');
+                const textarea = pageContent;
+                const start = textarea.selectionStart;
+                const text = textarea.value;
+                
+                textarea.value = text.substring(0, start) + `<img src="${url}" alt="${alt}">` + text.substring(start);
+            }
+        }
+        
+        // 页面选择
+        document.querySelectorAll('.page-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.page-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                currentPage = this.dataset.page;
+                loadPageData(currentPage);
+            });
+        });
+        
+        // 保存按钮
+        document.getElementById('saveBtn').addEventListener('click', savePageData);
+        
+        // 预览按钮
+        document.getElementById('previewBtn').addEventListener('click', () => {
+            const previewContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${pageTitle.value}</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        h1 { color: #333; }
+        h2 { color: #666; }
+    </style>
+</head>
+<body>
+    <h1>${mainHeading.value}</h1>
+    <h2>${subHeading.value}</h2>
+    ${pageContent.value}
+</body>
+</html>`;
+            
+            const blob = new Blob([previewContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        });
+        
+        // 退出登录
+        document.getElementById('logoutNav').addEventListener('click', () => {
+            localStorage.removeItem('admin_session');
+            window.location.href = './login.html';
+        });
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 检查登录状态
+            const sessionStr = localStorage.getItem('admin_session');
+            if (!sessionStr) {
+                window.location.href = './login.html';
+                return;
+            }
+            
+            // 加载保存的数据
+            const savedData = localStorage.getItem('page_content_data');
+            if (savedData) {
+                Object.assign(pageData, JSON.parse(savedData));
+            }
+            
+            loadPageData(currentPage);
+        });
+    </script>
+</body>
+</html>

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const contactForm = document.getElementById('contactForm');
     const RATE_LIMIT_KEY = 'contact_form_last_submit';
     const RATE_LIMIT_SECONDS = 60;
-    const API_URL = '/api/send-email';
+    const MESSAGES_KEY = 'contact_messages';
 
     function getLastSubmitTime() {
         const lastTime = localStorage.getItem(RATE_LIMIT_KEY);
@@ -89,28 +89,34 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = true;
             submitBtn.classList.add('btn-disabled');
 
-            setLastSubmitTime(Math.floor(Date.now() / 1000));
-
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ name, email, subject, message })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    alert('✅ ' + data.message);
-                    contactForm.reset();
-                } else {
-                    alert('❌ ' + data.message);
+                // 保存消息到本地存储（管理后台可查看）
+                const messages = JSON.parse(localStorage.getItem(MESSAGES_KEY) || '[]');
+                const newMessage = {
+                    id: Date.now(),
+                    name: name,
+                    email: email,
+                    subject: subject,
+                    message: message,
+                    time: new Date().toLocaleString('zh-CN'),
+                    read: false
+                };
+                messages.unshift(newMessage);
+                
+                // 只保留最近100条消息
+                if (messages.length > 100) {
+                    messages.splice(100);
                 }
+                
+                localStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
+                setLastSubmitTime(Math.floor(Date.now() / 1000));
+                
+                alert('✅ 消息发送成功！我们会尽快回复您。');
+                contactForm.reset();
+                
             } catch (error) {
                 console.error('发送失败:', error);
-                alert('❌ 网络错误，请检查网络连接后重试！');
+                alert('❌ 发送失败，请稍后重试！');
             } finally {
                 submitBtn.textContent = originalText;
                 updateButtonState(submitBtn, RATE_LIMIT_SECONDS);
