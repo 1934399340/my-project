@@ -1,6 +1,5 @@
 name = "gyfish"
 compatibility_date = "2024-01-01"
-account_id = "1bd3c53195c17051c54b36aa5766b435"
 
 # Cloudflare Pages 配置
 pages_build_output_dir = "./web_files"
