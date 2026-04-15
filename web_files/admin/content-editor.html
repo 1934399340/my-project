@@ -568,14 +568,41 @@
         }
         
         // 加载页面数据
-        function loadPageData(page) {
-            const data = pageData[page] || {};
-            pageTitle.value = data.title || '';
-            pageDescription.value = data.description || '';
-            mainHeading.value = data.mainHeading || '';
-            subHeading.value = data.subHeading || '';
-            pageContent.value = data.content || '';
-            pageExcerpt.value = data.excerpt || '';
+        async function loadPageData(page) {
+            try {
+                // 从API加载数据
+                const response = await fetch(`/api/content?page=${page}`);
+                const data = await response.json();
+                
+                if (data.success && data.content) {
+                    // 使用API返回的数据
+                    pageTitle.value = data.content.title || '';
+                    pageDescription.value = data.content.description || '';
+                    mainHeading.value = data.content.heading || '';
+                    subHeading.value = data.content.subheading || '';
+                    pageContent.value = data.content.content || '';
+                    pageExcerpt.value = data.content.excerpt || '';
+                } else {
+                    // 使用localStorage中的数据或默认数据
+                    const localData = pageData[page] || {};
+                    pageTitle.value = localData.title || '';
+                    pageDescription.value = localData.description || '';
+                    mainHeading.value = localData.mainHeading || '';
+                    subHeading.value = localData.subHeading || '';
+                    pageContent.value = localData.content || '';
+                    pageExcerpt.value = localData.excerpt || '';
+                }
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                // 使用localStorage中的数据或默认数据
+                const localData = pageData[page] || {};
+                pageTitle.value = localData.title || '';
+                pageDescription.value = localData.description || '';
+                mainHeading.value = localData.mainHeading || '';
+                subHeading.value = localData.subHeading || '';
+                pageContent.value = localData.content || '';
+                pageExcerpt.value = localData.excerpt || '';
+            }
             
             // 更新标题
             const pageNames = {
@@ -591,20 +618,42 @@
         }
         
         // 保存页面数据
-        function savePageData() {
-            pageData[currentPage] = {
+        async function savePageData() {
+            // 构建保存数据
+            const contentData = {
                 title: pageTitle.value,
                 description: pageDescription.value,
-                mainHeading: mainHeading.value,
-                subHeading: subHeading.value,
+                heading: mainHeading.value,
+                subheading: subHeading.value,
                 content: pageContent.value,
                 excerpt: pageExcerpt.value
             };
             
-            // 保存到localStorage
+            // 保存到localStorage（备份）
+            pageData[currentPage] = contentData;
             localStorage.setItem('page_content_data', JSON.stringify(pageData));
             
-            showMessage('success', '✅ 内容已保存！点击"应用到网站"将更新到前端页面。');
+            try {
+                // 调用API保存到数据库
+                const response = await fetch(`/api/content?page=${currentPage}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contentData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('success', '✅ 内容已成功保存到网站！');
+                } else {
+                    showMessage('error', '❌ 保存失败：' + (data.error || '未知错误'));
+                }
+            } catch (error) {
+                console.error('保存失败:', error);
+                showMessage('error', '❌ 保存失败：网络错误，请重试');
+            }
         }
         
         // 插入标签
@@ -655,11 +704,11 @@
         
         // 页面选择
         document.querySelectorAll('.page-card').forEach(card => {
-            card.addEventListener('click', function() {
+            card.addEventListener('click', async function() {
                 document.querySelectorAll('.page-card').forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
                 currentPage = this.dataset.page;
-                loadPageData(currentPage);
+                await loadPageData(currentPage);
             });
         });
         
@@ -699,7 +748,7 @@
         });
         
         // 初始化
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // 检查登录状态
             const sessionStr = localStorage.getItem('admin_session');
             if (!sessionStr) {
@@ -713,7 +762,7 @@
                 Object.assign(pageData, JSON.parse(savedData));
             }
             
-            loadPageData(currentPage);
+            await loadPageData(currentPage);
         });
     </script>
 </body>
