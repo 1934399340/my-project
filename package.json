@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "echo 'Static site - open index.html directly'",
     "build": "echo 'Static site - no build needed'",
-    "deploy": "wrangler pages deploy web_files --project-name=gyfish"
+    "deploy": "npx wrangler pages deploy web_files --project-name=gyfish"
   },
   "dependencies": {
     "nodemailer": "^6.9.8"
