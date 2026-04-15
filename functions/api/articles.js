@@ -13,6 +13,7 @@ export async function onRequest(context) {
   const url = new URL(context.request.url);
   const id = url.searchParams.get('id');
   const category = url.searchParams.get('category');
+  const published = url.searchParams.get('published');
 
   try {
     const { request, env } = context;
@@ -22,7 +23,7 @@ export async function onRequest(context) {
       if (id) {
         // 获取单篇文章
         const { results } = await env.DB.prepare(
-          'SELECT * FROM articles WHERE id = ?'
+          'SELECT * FROM posts WHERE id = ?'
         ).bind(id).all();
 
         if (results.length === 0) {
@@ -43,12 +44,22 @@ export async function onRequest(context) {
         });
       } else {
         // 获取文章列表
-        let query = 'SELECT * FROM articles';
+        let query = 'SELECT * FROM posts';
         const params = [];
+        let conditions = [];
 
         if (category) {
-          query += ' WHERE category = ?';
+          conditions.push('category = ?');
           params.push(category);
+        }
+
+        if (published !== null) {
+          conditions.push('published = ?');
+          params.push(published === 'true');
+        }
+
+        if (conditions.length > 0) {
+          query += ' WHERE ' + conditions.join(' AND ');
         }
 
         query += ' ORDER BY created_at DESC';
@@ -69,7 +80,7 @@ export async function onRequest(context) {
     // POST - 创建文章
     if (request.method === 'POST') {
       const body = await request.json();
-      const { category, title, content, excerpt, author, status } = body;
+      const { category, title, content, excerpt, cover_url, read_time, published, published_at } = body;
 
       if (!category || !title) {
         return new Response(JSON.stringify({
@@ -82,15 +93,17 @@ export async function onRequest(context) {
       }
 
       const result = await env.DB.prepare(`
-        INSERT INTO articles (category, title, content, excerpt, author, status)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO posts (category, title, content, excerpt, cover_url, read_time, published, published_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         category,
         title,
         content || '',
         excerpt || '',
-        author || '李桂宇',
-        status || 'published'
+        cover_url || '',
+        read_time || 5,
+        published || false,
+        published && published_at ? published_at : null
       ).run();
 
       return new Response(JSON.stringify({
@@ -115,24 +128,28 @@ export async function onRequest(context) {
       }
 
       const body = await request.json();
-      const { category, title, content, excerpt, author, status } = body;
+      const { category, title, content, excerpt, cover_url, read_time, published, published_at } = body;
 
       await env.DB.prepare(`
-        UPDATE articles
+        UPDATE posts
         SET category = COALESCE(?, category),
             title = COALESCE(?, title),
             content = COALESCE(?, content),
             excerpt = COALESCE(?, excerpt),
-            author = COALESCE(?, author),
-            status = COALESCE(?, status)
+            cover_url = COALESCE(?, cover_url),
+            read_time = COALESCE(?, read_time),
+            published = COALESCE(?, published),
+            published_at = COALESCE(?, published_at)
         WHERE id = ?
       `).bind(
         category,
         title,
         content,
         excerpt,
-        author,
-        status,
+        cover_url,
+        read_time,
+        published,
+        published_at,
         id
       ).run();
 
@@ -156,7 +173,7 @@ export async function onRequest(context) {
         });
       }
 
-      await env.DB.prepare('DELETE FROM articles WHERE id = ?').bind(id).run();
+      await env.DB.prepare('DELETE FROM posts WHERE id = ?').bind(id).run();
 
       return new Response(JSON.stringify({
         success: true,
