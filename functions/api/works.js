@@ -103,7 +103,7 @@ export async function onRequest(context) {
         client || '',
         year || '2024',
         featured || false,
-        media_ids || '{}'
+        media_ids || '[]'
       ).run();
 
       return new Response(JSON.stringify({

@@ -12,7 +12,6 @@ export async function onRequest(context) {
 
   const url = new URL(context.request.url);
   const page = url.searchParams.get('page');
-  const category = url.searchParams.get('category');
 
   try {
     const { request, env } = context;
@@ -22,7 +21,7 @@ export async function onRequest(context) {
       if (page) {
         // 获取指定页面内容
         const { results } = await env.DB.prepare(
-          'SELECT * FROM content WHERE page = ?'
+          'SELECT * FROM settings WHERE id = ?'
         ).bind(page).all();
 
         return new Response(JSON.stringify({
@@ -31,22 +30,10 @@ export async function onRequest(context) {
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
-      } else if (category) {
-        // 按分类获取内容
-        const { results } = await env.DB.prepare(
-          'SELECT * FROM content WHERE page LIKE ? ORDER BY page'
-        ).bind(`${category}%`).all();
-
-        return new Response(JSON.stringify({
-          success: true,
-          contents: results
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
       } else {
         // 获取所有内容
         const { results } = await env.DB.prepare(
-          'SELECT * FROM content ORDER BY page'
+          'SELECT * FROM settings'
         ).all();
 
         return new Response(JSON.stringify({
@@ -71,32 +58,33 @@ export async function onRequest(context) {
       }
 
       const body = await request.json();
-      const { title, description, heading, subheading, content, excerpt } = body;
+      const { site_title, site_description, avatar_url, email, wechat, address, social } = body;
 
       // 检查内容是否存在
       const { results } = await env.DB.prepare(
-        'SELECT id FROM content WHERE page = ?'
+        'SELECT id FROM settings WHERE id = ?'
       ).bind(page).all();
 
       if (results.length > 0) {
         // 更新现有内容
         await env.DB.prepare(`
-          UPDATE content
-          SET title = COALESCE(?, title),
-              description = COALESCE(?, description),
-              heading = COALESCE(?, heading),
-              subheading = COALESCE(?, subheading),
-              content = COALESCE(?, content),
-              excerpt = COALESCE(?, excerpt),
+          UPDATE settings
+          SET site_title = COALESCE(?, site_title),
+              site_description = COALESCE(?, site_description),
+              avatar_url = COALESCE(?, avatar_url),
+              email = COALESCE(?, email),
+              wechat = COALESCE(?, wechat),
+              address = COALESCE(?, address),
+              social = COALESCE(?, social),
               updated_at = CURRENT_TIMESTAMP
-          WHERE page = ?
-        `).bind(title, description, heading, subheading, content, excerpt, page).run();
+          WHERE id = ?
+        `).bind(site_title, site_description, avatar_url, email, wechat, address, social, page).run();
       } else {
         // 创建新内容
         await env.DB.prepare(`
-          INSERT INTO content (page, title, description, heading, subheading, content, excerpt)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).bind(page, title || '', description || '', heading || '', subheading || '', content || '', excerpt || '').run();
+          INSERT INTO settings (id, site_title, site_description, avatar_url, email, wechat, address, social)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(page, site_title || '', site_description || '', avatar_url || '', email || '', wechat || '', address || '', social || '{}').run();
       }
 
       return new Response(JSON.stringify({
