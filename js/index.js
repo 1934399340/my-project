@@ -1,9 +1,12 @@
 // 首页数据加载和交互
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('首页数据加载初始化...');
     
     // 初始化数据服务
     const dataService = new FrontendDataService();
+    
+    // 加载页面内容
+    await loadPageContent(dataService, 'index');
     
     // 加载精选作品
     loadFeaturedWorks(dataService);
@@ -130,6 +133,53 @@ function updateSiteInfo(settings) {
     // 更新英雄部分的名称
     if (settings.site_title && heroTitle) {
         heroTitle.textContent = settings.site_title;
+    }
+}
+
+// 加载页面内容
+async function loadPageContent(dataService, page) {
+    try {
+        const content = await dataService.getPageContent(page);
+        if (content) {
+            // 更新页面标题和描述
+            if (content.title) {
+                const pageTitle = document.querySelector('title');
+                if (pageTitle) {
+                    pageTitle.textContent = content.title;
+                }
+            }
+            
+            if (content.description) {
+                const metaDesc = document.querySelector('meta[name="description"]');
+                if (metaDesc) {
+                    metaDesc.setAttribute('content', content.description);
+                }
+            }
+            
+            // 更新页面内容
+            if (content.heading) {
+                const mainHeading = document.querySelector('.hero-title .highlight');
+                if (mainHeading) {
+                    mainHeading.textContent = content.heading;
+                }
+            }
+            
+            if (content.subheading) {
+                const subHeading = document.querySelector('.hero-subtitle');
+                if (subHeading) {
+                    subHeading.textContent = content.subheading;
+                }
+            }
+            
+            if (content.content) {
+                const contentSection = document.querySelector('.hero-content .hero-description');
+                if (contentSection) {
+                    contentSection.innerHTML = content.content;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('加载页面内容失败:', error);
     }
 }
 

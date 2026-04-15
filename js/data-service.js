@@ -105,6 +105,23 @@ class FrontendDataService {
             return this.getFallbackSettings();
         }
     }
+    
+    // 获取页面内容
+    async getPageContent(page) {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/content?page=${page}`);
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || '获取页面内容失败');
+            }
+            
+            return data.content || null;
+        } catch (error) {
+            console.error(`获取${page}页面内容失败:`, error.message);
+            return null;
+        }
+    }
 
     // 增加作品浏览量
     async incrementViews(portfolioId) {
