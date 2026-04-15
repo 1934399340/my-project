@@ -1,4 +1,4 @@
-// 作品管理 API (CRUD)
+// 作品集管理 API (CRUD)
 export async function onRequest(context) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -13,16 +13,17 @@ export async function onRequest(context) {
   const url = new URL(context.request.url);
   const id = url.searchParams.get('id');
   const category = url.searchParams.get('category');
+  const featured = url.searchParams.get('featured');
 
   try {
     const { request, env } = context;
 
-    // GET - 获取作品列表或单个作品
+    // GET - 获取作品集列表或单个作品
     if (request.method === 'GET') {
       if (id) {
         // 获取单个作品
         const { results } = await env.DB.prepare(
-          'SELECT * FROM works WHERE id = ?'
+          'SELECT * FROM portfolio WHERE id = ?'
         ).bind(id).all();
 
         if (results.length === 0) {
@@ -42,16 +43,26 @@ export async function onRequest(context) {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       } else {
-        // 获取作品列表
-        let query = 'SELECT * FROM works';
+        // 获取作品集列表
+        let query = 'SELECT * FROM portfolio';
         const params = [];
+        let conditions = [];
 
         if (category) {
-          query += ' WHERE category = ?';
+          conditions.push('category = ?');
           params.push(category);
         }
 
-        query += ' ORDER BY sort_order ASC, created_at DESC';
+        if (featured !== null) {
+          conditions.push('featured = ?');
+          params.push(featured === 'true');
+        }
+
+        if (conditions.length > 0) {
+          query += ' WHERE ' + conditions.join(' AND ');
+        }
+
+        query += ' ORDER BY created_at DESC';
 
         const { results } = params.length > 0
           ? await env.DB.prepare(query).bind(...params).all()
@@ -69,9 +80,9 @@ export async function onRequest(context) {
     // POST - 创建作品
     if (request.method === 'POST') {
       const body = await request.json();
-      const { category, title, description, content, image_url, video_url, tools, duration, client, featured, sort_order, status } = body;
+      const { title, description, category, cover_url, client, year, featured, media_ids } = body;
 
-      if (!category || !title) {
+      if (!title || !category) {
         return new Response(JSON.stringify({
           success: false,
           error: '缺少必要字段'
@@ -82,21 +93,17 @@ export async function onRequest(context) {
       }
 
       const result = await env.DB.prepare(`
-        INSERT INTO works (category, title, description, content, image_url, video_url, tools, duration, client, featured, sort_order, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO portfolio (title, description, category, cover_url, client, year, featured, media_ids)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
-        category,
         title,
         description || '',
-        content || '',
-        image_url || '',
-        video_url || '',
-        tools || '',
-        duration || '',
+        category,
+        cover_url || '',
         client || '',
-        featured ? 1 : 0,
-        sort_order || 0,
-        status || 'published'
+        year || '2024',
+        featured || false,
+        media_ids || '{}'
       ).run();
 
       return new Response(JSON.stringify({
@@ -121,36 +128,28 @@ export async function onRequest(context) {
       }
 
       const body = await request.json();
-      const { category, title, description, content, image_url, video_url, tools, duration, client, featured, sort_order, status } = body;
+      const { title, description, category, cover_url, client, year, featured, media_ids } = body;
 
       await env.DB.prepare(`
-        UPDATE works
-        SET category = COALESCE(?, category),
-            title = COALESCE(?, title),
+        UPDATE portfolio
+        SET title = COALESCE(?, title),
             description = COALESCE(?, description),
-            content = COALESCE(?, content),
-            image_url = COALESCE(?, image_url),
-            video_url = COALESCE(?, video_url),
-            tools = COALESCE(?, tools),
-            duration = COALESCE(?, duration),
+            category = COALESCE(?, category),
+            cover_url = COALESCE(?, cover_url),
             client = COALESCE(?, client),
+            year = COALESCE(?, year),
             featured = COALESCE(?, featured),
-            sort_order = COALESCE(?, sort_order),
-            status = COALESCE(?, status)
+            media_ids = COALESCE(?, media_ids)
         WHERE id = ?
       `).bind(
-        category,
         title,
         description,
-        content,
-        image_url,
-        video_url,
-        tools,
-        duration,
+        category,
+        cover_url,
         client,
-        featured !== undefined ? (featured ? 1 : 0) : null,
-        sort_order,
-        status,
+        year,
+        featured,
+        media_ids,
         id
       ).run();
 
@@ -174,7 +173,7 @@ export async function onRequest(context) {
         });
       }
 
-      await env.DB.prepare('DELETE FROM works WHERE id = ?').bind(id).run();
+      await env.DB.prepare('DELETE FROM portfolio WHERE id = ?').bind(id).run();
 
       return new Response(JSON.stringify({
         success: true,

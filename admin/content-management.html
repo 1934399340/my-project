@@ -672,10 +672,33 @@
             grid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
             
             try {
-                // 模拟数据
-                const mockData = getMockData(type);
+                let url = '';
+                switch(type) {
+                    case 'articles':
+                        url = '/api/articles';
+                        break;
+                    case 'works':
+                        url = '/api/works';
+                        break;
+                    case 'pages':
+                        url = '/api/content';
+                        break;
+                    default:
+                        throw new Error('未知内容类型');
+                }
                 
-                if (mockData.length === 0) {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || '加载失败');
+                }
+                
+                const items = type === 'articles' ? data.articles : 
+                             type === 'works' ? data.works : 
+                             data.contents || [];
+                
+                if (items.length === 0) {
                     grid.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon">📭</div>
@@ -686,25 +709,36 @@
                     return;
                 }
                 
-                grid.innerHTML = mockData.map(item => `
-                    <div class="content-card">
-                        <div class="card-image">${item.icon}</div>
-                        <div class="card-content">
-                            <h3 class="card-title">${item.title}</h3>
-                            <div class="card-meta">
-                                <span>${item.date}</span>
-                                <span>${item.status}</span>
-                            </div>
-                            <div class="card-tags">
-                                ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                            </div>
-                            <div class="card-actions">
-                                <button class="btn-action btn-edit" onclick="editContent('${item.id}')">编辑</button>
-                                <button class="btn-action btn-delete" onclick="deleteContent('${item.id}')">删除</button>
+                grid.innerHTML = items.map(item => {
+                    const icon = type === 'articles' ? '📝' : 
+                                type === 'works' ? '🎨' : '📄';
+                    const date = item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : '未知';
+                    const status = type === 'articles' ? (item.published ? '已发布' : '草稿') : 
+                                  type === 'works' ? '已发布' : '已发布';
+                    const tags = type === 'articles' ? (item.category ? [item.category] : []) : 
+                                type === 'works' ? (item.category ? [item.category] : []) : 
+                                [];
+                    
+                    return `
+                        <div class="content-card">
+                            <div class="card-image">${icon}</div>
+                            <div class="card-content">
+                                <h3 class="card-title">${item.title}</h3>
+                                <div class="card-meta">
+                                    <span>${date}</span>
+                                    <span>${status}</span>
+                                </div>
+                                <div class="card-tags">
+                                    ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn-action btn-edit" onclick="editContent('${item.id}', '${type}')">编辑</button>
+                                    <button class="btn-action btn-delete" onclick="deleteContent('${item.id}', '${type}')">删除</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
                 
             } catch (error) {
                 console.error('加载内容失败:', error);
@@ -718,59 +752,6 @@
             }
         }
 
-        // 获取模拟数据
-        function getMockData(type) {
-            const data = {
-                articles: [
-                    {
-                        id: '1',
-                        title: '5个让你的视频更专业的剪辑技巧',
-                        icon: '🎬',
-                        date: '2024-03-15',
-                        status: '已发布',
-                        tags: ['剪辑', '技巧', '视频']
-                    },
-                    {
-                        id: '2',
-                        title: '如何写出让人忍不住转发的文案',
-                        icon: '✍️',
-                        date: '2024-03-10',
-                        status: '草稿',
-                        tags: ['文案', '营销', '写作']
-                    }
-                ],
-                works: [
-                    {
-                        id: '3',
-                        title: '城市风光延时摄影',
-                        icon: '🌆',
-                        date: '2024-03-05',
-                        status: '已发布',
-                        tags: ['摄影', '风光', '延时']
-                    },
-                    {
-                        id: '4',
-                        title: '品牌形象宣传片',
-                        icon: '🎥',
-                        date: '2024-02-28',
-                        status: '已发布',
-                        tags: ['视频', '品牌', '宣传']
-                    }
-                ],
-                pages: [
-                    {
-                        id: '5',
-                        title: '关于我们',
-                        icon: '👤',
-                        date: '2024-01-15',
-                        status: '已发布',
-                        tags: ['页面', '介绍']
-                    }
-                ]
-            };
-            return data[type] || [];
-        }
-
         function getTypeName(type) {
             const names = {
                 articles: '文章',
@@ -778,6 +759,165 @@
                 pages: '页面'
             };
             return names[type] || '内容';
+        }
+
+        // 编辑内容
+        async function editContent(id, type) {
+            try {
+                let url = '';
+                switch(type) {
+                    case 'articles':
+                        url = `/api/articles?id=${id}`;
+                        break;
+                    case 'works':
+                        url = `/api/works?id=${id}`;
+                        break;
+                    case 'pages':
+                        url = `/api/content?page=${id}`;
+                        break;
+                    default:
+                        throw new Error('未知内容类型');
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || '加载失败');
+                }
+                
+                const item = type === 'articles' ? data.article : 
+                             type === 'works' ? data.work : 
+                             data.content;
+                
+                if (!item) {
+                    throw new Error('内容不存在');
+                }
+                
+                currentContent = { id, type };
+                currentTags = [];
+                
+                document.getElementById('modalTitle').textContent = '编辑内容';
+                document.getElementById('contentId').value = id;
+                document.getElementById('contentType').value = type;
+                document.getElementById('contentTitle').value = item.title || '';
+                document.getElementById('contentSlug').value = item.slug || '';
+                document.getElementById('contentExcerpt').value = item.excerpt || '';
+                document.getElementById('contentImage').value = item.cover_url || '';
+                document.getElementById('contentCategory').value = item.category || '';
+                document.getElementById('contentBody').value = item.content || '';
+                document.getElementById('contentPublished').checked = item.published || false;
+                
+                renderTags();
+                document.getElementById('contentModal').classList.add('show');
+                
+            } catch (error) {
+                console.error('加载编辑内容失败:', error);
+                alert('加载失败：' + error.message);
+            }
+        }
+
+        // 删除内容
+        async function deleteContent(id, type) {
+            if (!confirm('确定要删除这个内容吗？')) {
+                return;
+            }
+            
+            try {
+                let url = '';
+                switch(type) {
+                    case 'articles':
+                        url = `/api/articles?id=${id}`;
+                        break;
+                    case 'works':
+                        url = `/api/works?id=${id}`;
+                        break;
+                    case 'pages':
+                        url = `/api/content?page=${id}`;
+                        break;
+                    default:
+                        throw new Error('未知内容类型');
+                }
+                
+                const response = await fetch(url, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || '删除失败');
+                }
+                
+                alert('删除成功！');
+                refreshCurrentTab();
+                
+            } catch (error) {
+                console.error('删除内容失败:', error);
+                alert('删除失败：' + error.message);
+            }
+        }
+
+        // 保存内容
+        async function saveContent() {
+            const form = document.getElementById('contentForm');
+            const contentId = document.getElementById('contentId').value;
+            const contentType = document.getElementById('contentType').value;
+            
+            const contentData = {
+                title: document.getElementById('contentTitle').value,
+                slug: document.getElementById('contentSlug').value,
+                excerpt: document.getElementById('contentExcerpt').value,
+                cover_url: document.getElementById('contentImage').value,
+                category: document.getElementById('contentCategory').value,
+                content: document.getElementById('contentBody').value,
+                published: document.getElementById('contentPublished').checked,
+                tags: currentTags
+            };
+            
+            try {
+                let url = '';
+                let method = '';
+                
+                switch(contentType) {
+                    case 'articles':
+                        url = contentId ? `/api/articles?id=${contentId}` : '/api/articles';
+                        method = contentId ? 'PUT' : 'POST';
+                        break;
+                    case 'works':
+                        url = contentId ? `/api/works?id=${contentId}` : '/api/works';
+                        method = contentId ? 'PUT' : 'POST';
+                        break;
+                    case 'pages':
+                        url = contentId ? `/api/content?page=${contentId}` : '/api/content';
+                        method = contentId ? 'PUT' : 'POST';
+                        break;
+                    default:
+                        throw new Error('未知内容类型');
+                }
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contentData)
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || '保存失败');
+                }
+                
+                alert('内容保存成功！');
+                closeModal();
+                refreshCurrentTab();
+                
+            } catch (error) {
+                console.error('保存失败:', error);
+                alert('保存失败：' + error.message);
+            }
         }
 
         function refreshCurrentTab() {
@@ -788,13 +928,6 @@
         // 页面初始化
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // 检查认证状态
-                const authState = await auth.getAuthState();
-                if (!authState || !authState.user) {
-                    window.location.href = './unified-login.html';
-                    return;
-                }
-                
                 // 初始化标签系统
                 renderTags();
                 
@@ -803,7 +936,6 @@
                 
             } catch (error) {
                 console.error('初始化失败:', error);
-                window.location.href = './unified-login.html';
             }
         });
 
