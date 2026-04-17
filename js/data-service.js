@@ -68,7 +68,7 @@ class FrontendDataService {
             }
             
             if (published !== null) {
-                params.append('published', published);
+                params.append('status', published ? 'published' : 'draft');
             }
             
             if (params.toString()) {

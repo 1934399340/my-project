@@ -231,5 +231,46 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <script src="js/data-service.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const articlesContainer = document.querySelector('.main-content');
+            
+            try {
+                // 显示加载状态
+                articlesContainer.innerHTML = '<div style="text-align: center; padding: 40px;">加载中...</div>';
+                
+                // 加载摄影文章
+                const articles = await window.DataService.loadArticles('photography');
+                
+                if (articles.length === 0) {
+                    articlesContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: #64748b;">暂无摄影文章</div>';
+                    return;
+                }
+                
+                // 渲染文章列表
+                articlesContainer.innerHTML = articles.map(article => `
+                    <article class="article-card">
+                        <div class="article-image">
+                            <img src="${article.cover_url || 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&q=80'}" alt="${article.title}">
+                        </div>
+                        <div class="article-content">
+                            <span class="article-category">${window.DataService.ARTICLE_CATEGORY_NAMES[article.category] || article.category}</span>
+                            <h2 class="article-title">${article.title}</h2>
+                            <p class="article-excerpt">${article.excerpt || '暂无摘要'}</p>
+                            <div class="article-meta">
+                                <span>${new Date(article.created_at).toLocaleDateString('zh-CN')}</span>
+                                <span>阅读 ${article.read_time || 5} 分钟</span>
+                            </div>
+                            <a href="article-detail.html?id=${article.id}" class="btn btn-sm">阅读全文</a>
+                        </div>
+                    </article>
+                `).join('');
+            } catch (error) {
+                console.error('加载文章失败:', error);
+                articlesContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: #ef4444;">加载失败，请刷新页面重试</div>';
+            }
+        });
+    </script>
 </body>
 </html>

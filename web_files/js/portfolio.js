@@ -50,7 +50,11 @@ function renderPortfolioGrid(works) {
     const portfolioGrid = document.getElementById('portfolioGrid');
     if (!portfolioGrid) return;
 
-    const categoryNames = window.DataService.CATEGORY_NAMES;
+    const categoryNames = {
+        video: '视频创作',
+        image: '图片作品',
+        branding: '品牌定制'
+    };
 
     works.forEach((work, index) => {
         const isLargeCard = index === 0;
@@ -64,7 +68,7 @@ function renderPortfolioGrid(works) {
         article.innerHTML = `
             <div class="${cardClass}">
                 <div class="work-image-wrapper">
-                    <img src="${work.image_url || 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&q=80'}"
+                    <img src="${work.cover_url || work.image_url || 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&q=80'}"
                          alt="${work.title}" loading="lazy">
                     <div class="work-gradient"></div>
                     ${work.featured ? '<div class="work-badge">精选</div>' : ''}
@@ -151,18 +155,6 @@ function addExpandListeners() {
     });
 }
 
-// 根据ID获取作品
-async function getWorkById(id) {
-    try {
-        const response = await fetch(`${window.DataService.API_BASE || ''}/api/works?id=${id}`);
-        const result = await response.json();
-        return result.success ? result.work : null;
-    } catch (error) {
-        console.error('获取作品详情失败:', error);
-        return null;
-    }
-}
-
 // 设置其他事件监听器
 function setupPortfolioEventListeners() {
     const filterBtns = document.querySelectorAll('.filter-btn');
@@ -179,7 +171,14 @@ function setupPortfolioEventListeners() {
 
             portfolioGrid.innerHTML = '<div class="loading" style="grid-column: 1/-1; text-align: center; padding: 40px;">加载中...</div>';
 
-            const works = await window.DataService.loadWorks(filter === 'all' ? null : filter);
+            const categoryMap = {
+                'video': 'video',
+                'photo': 'image',
+                'brand': 'branding'
+            };
+
+            const category = filter === 'all' ? null : categoryMap[filter];
+            const works = await window.DataService.loadWorks(category);
 
             portfolioGrid.innerHTML = '';
 
