@@ -35,8 +35,8 @@ async function loadWorks(category = null) {
 async function loadArticles(category = null) {
     try {
         const url = category
-            ? `${API_BASE}/api/articles?category=${category}`
-            : `${API_BASE}/api/articles`;
+            ? `${API_BASE}/api/articles?category=${category}&status=published`
+            : `${API_BASE}/api/articles?status=published`;
         const response = await fetch(url);
         const result = await response.json();
         return result.success ? result.articles : [];
